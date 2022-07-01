@@ -1,0 +1,25 @@
+;; -*-scheme-*-
+
+(Header "
+        item            : AudioObjectMotion.dco
+        made by         : Rene' van Paassen
+        date            : 171130
+        description     : Volume and pitch of an audio object
+        copyright       : (c) 2017 TUDelft-AE-C&S")
+
+(Type BaseObjectMotion "#include \"BaseObjectMotion.hxx\"")
+(Type float)
+
+;; This provides basic audio properties of a moving sound. The movement may
+;; be relative to the observer or absolute in the world, this
+;; distinction is made at creation
+(Stream AudioObjectMotion
+	(Inherits BaseObjectMotion)
+        (Option hdf5)
+
+	;; volume of the playback
+	(float volume (Default 0.0f))
+
+	;; pitch value of the playback
+	(float pitch (Default 1.0f))
+       )

@@ -1,0 +1,21 @@
+;; -*-scheme-*-
+
+(Header "
+        item            : RecordingProgress.dco
+        made by         : Rene' van Paassen
+        date            : 120518
+        description     : Report progress of sound recording
+        copyright       : (c) 2017 TUDelft-AE-C&S")
+ 
+(Type uint32_t)
+
+;; This provides the movement of an object, and the first derivative of that
+;; the class has a simple extrapolation method (extrapolate), that provides
+;; an object with extrapolated position. 
+(Object RecordingProgress
+	(Option hdf5)
+	(Option msgpack)
+
+       ;; Number of samples recorded
+       (uint32_t sample_count)
+       )

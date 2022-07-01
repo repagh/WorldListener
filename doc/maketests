@@ -1,0 +1,11 @@
+#!/bin/bash
+
+gcc -DLIBAUDIO openal-example.c `pkg-config --libs openal` -laudio \
+    -o openal-example.x
+
+g++ openal.cpp -lglut -lGL -lGLU `pkg-config --libs openal freealut` -o openal.x
+
+ln -sf test.wav a.wav
+ln -sf test.wav b.wav
+ln -sf test.wav c.wav
+

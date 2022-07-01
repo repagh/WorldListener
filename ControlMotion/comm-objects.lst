@@ -1,0 +1,9 @@
+# this file contains a list of all communicated objects needed by this 
+# specific module
+# specify these with the .dco extension, examples:
+#WorldListener/comm-objects/BaseObjectMotion.dco #  Removed for Policy: 'replace-worldview-dco-motion':'21-001'
+WorldListener/comm-objects/AudioObjectMotion.dco
+WorldListener/comm-objects/AudioObjectFixed.dco
+# Generic/comm-objects/PrimaryControls.dco
+
+WorldView/comm-objects/BaseObjectMotion.dco  # Added for Policy: 'replace-worldview-dco-motion':'21-001'

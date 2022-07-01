@@ -1,0 +1,25 @@
+;; -*-scheme-*-
+
+(Header "
+        item            : AudioObjectFixed.dco
+        made by         : Rene' van Paassen
+        date            : 171130
+        description     : Volume and pitch of an audio object
+        copyright       : (c) 2017 TUDelft-AE-C&S")
+
+(Type float)
+
+;; This provides basic audio properties of a sound fixed in the world
+;; for example sounds of a static object. 
+;;
+;; sounds in event channels are played as events come in, and played once,
+;; sounds in stream channels are played continuously looping
+(Stream AudioObjectFixed
+
+        (Option hdf5)
+	;; volume of the playback
+	(float volume (Default 0.0f))
+
+	;; pitch value of the playback
+	(float pitch (Default 1.0f))
+       )
