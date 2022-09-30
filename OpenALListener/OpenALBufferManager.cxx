@@ -74,7 +74,6 @@ ALuint OpenALBufferManager::getBuffer(const std::string& fname)
 
   if (lenfn > 4 && fname.substr(lenfn - 4) == std::string(".wav")) {
 
-#if 1
     SDL_AudioSpec wav_spec;
     uint32_t wav_len;
     uint8_t *bufferData;
@@ -82,32 +81,18 @@ ALuint OpenALBufferManager::getBuffer(const std::string& fname)
     if (SDL_LoadWAV(fname.c_str(), &wav_spec, &bufferData, &wav_len) == NULL) {
       throw(SoundFileReadError(fname, "cannot open"));
     }
+    // Add a warning about non-mono files. They play, but not localized/
+    // controlled by the sound position
+    if (wav_spec.channels > 1) {
+      W_MOD("File " << fname <<
+	    " is not mono! Sound localization will not work!");
+    }
     alGenBuffers((ALuint)1, &buffer);
     alBufferData(buffer, to_al_format(wav_spec.channels, wav_spec.format),
                  bufferData, wav_len, wav_spec.freq);
     SDL_FreeWAV(bufferData);
     buffers[fname] = buffer;
     return buffer;
-#else
-    WaveInfo *wave = WaveOpenFileForReading(fname.c_str());
-    if (!wave) {
-      throw(SoundFileReadError(fname, "cannot open"));
-    }
-    int ret = WaveSeekFile(0, wave);
-    if (ret) {
-      throw(SoundFileReadError(fname, "cannot seek"));
-    }
-    bufferData = new char[wave->dataSize];
-    size_t nread = WaveReadFile(bufferData, wave->dataSize, wave);
-    if (nread != wave->dataSize) {
-      throw(SoundFileReadError(fname, "incomplete read"));
-    }
-    alGenBuffers((ALuint)1, &buffer);
-    alBufferData(buffer, to_al_format(wave->channels, wave->bitsPerSample),
-                 bufferData, wave->dataSize, wave->sampleRate);
-    buffers[fname] = buffer;
-    return buffer;
-#endif
   }
   
   throw(SoundFileReadError(fname, "cannot read file type"));
