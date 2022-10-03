@@ -9,6 +9,9 @@
         copyright       : (c) 2017 TUDelft-AE-C&S
 */
 
+//https://stackoverflow.com/questions/61326170/im-trying-to-open-a-stream-in-portaudio
+
+
 #define PortAudioObject_cxx
 #include "PortAudioObject.hxx"
 #include "PortAudioListener.hxx"
@@ -56,65 +59,48 @@ bool PortAudioObject::initSound(PortAudioListener* master)
       return false;
     }
 
-    // create the source
-    alGenSources((ALuint)1, &source);
-    if (haveALError("obtaining source")) return false;
+    // loading function
+    auto cfun =
+      [this](const void *input, void *output, unsigned long frameCount,
+             const PaStreamCallbackTimeInfo* timeinfo,
+             PaStreamCallbackFlags statusFlags, void *userdata) {
 
-    // bind them together
-    alSourcei(source, AL_BUFFER, buffer);
-    if (haveALError("binding source to buffer")) return false;
+        auto out = reinterpret_cast<float*>(output);
+        auto lastout = out + frameCount;
+        while (this->buffer->info.frames - this->ridx <= frameCount) {
+          std::copy(&this->buffer->data[this->ridx],
+                    &this->buffer->data[this->buffer->info.frames],
+                    reinterpret_cast<float*>(output));
 
-    // data in the spec;
-    // * coordinates used for xyz, uvw, pitch, gain
-    // * type used for "looping", otherwise single
-    // * name not used
-    // openal coord sys x=right, y=up, z=towards you
+          out += this->buffer->info.frames - this->ridx;
+          frameCount -= this->buffer->info.frames - this->ridx;
+          if (!this->looping) {
+            std::fill(reinterpret_cast<float*>(output), lastout, 0.0f);
+            return paComplete;
+          }
+          else {
+            this->ridx = 0;
+          }
+        }
 
-    if (spec.coordinates.size() >= 3) {
-      alSource3f(source, AL_POSITION, spec.coordinates[1],
-                 -spec.coordinates[2], -spec.coordinates[0]);
-      if (haveALError("setting position")) return false;
-    }
-    if (spec.coordinates.size() >= 6) {
-      alSource3f(source, AL_VELOCITY, spec.coordinates[4],
-                 -spec.coordinates[5], -spec.coordinates[3]);
-      if (haveALError("setting velocity")) return false;
-    }
-    if (spec.coordinates.size() >= 7) {
-      base_volume = spec.coordinates[6];
-      alSourcef(source, AL_GAIN, spec.coordinates[6]);
-      if (haveALError("setting gain")) return false;
-    }
-    if (spec.coordinates.size() >= 8) {
-      alSourcef(source, AL_PITCH, spec.coordinates[7]);
-      if (haveALError("setting pitch")) return false;
-    }
-    alSourcei(source, AL_LOOPING,
-              looping ? AL_TRUE : AL_FALSE);
-    if (haveALError("setting looping")) return false;
+        std::copy(&this->buffer->data[this->ridx],
+                  &this->buffer->data[this->ridx+frameCount],
+                  out);
+        return paContinue;
+      };
 
-    // absolute source
-    alSourcei(source, AL_SOURCE_RELATIVE,
-              (spec.type.find("relative") != string::npos) ?
-              AL_TRUE : AL_FALSE);
-    if (haveALError("specifying relative")) return false;
+    PaStreamParameters out_param {
+      .device = master->getDeviceIndex(),
+      .channelCount = master->getNumChannels(),
+      .sampleFormat = paFloat32,
+      .suggestedLatency = 0};
 
-    if (spec.coordinates.size() >= 11) {
-      // distance model adjustments
-      alSourcef(source, AL_REFERENCE_DISTANCE, spec.coordinates[8]);
-      alSourcef(source, AL_MAX_DISTANCE, spec.coordinates[9]);
-      alSourcef(source, AL_ROLLOFF_FACTOR, spec.coordinates[10]);
-    }
+    // create a stream
+    stream = Pa_OpenStream
+      (&stream, NULL, &out_param,
+       buffer->info.samplerate, master->getBufferSize(),
+       paNoFlag, cfun, NULL);
 
-    if (spec.coordinates.size() == 17) {
-      // directional sound
-      alSource3f(source, AL_DIRECTION, spec.coordinates[12],
-                 -spec.coordinates[13], -spec.coordinates[11]);
-      alSourcef(source, AL_CONE_INNER_ANGLE, spec.coordinates[14]);
-      alSourcef(source, AL_CONE_OUTER_ANGLE, spec.coordinates[15]);
-      alSourcef(source, AL_CONE_OUTER_GAIN, spec.coordinates[16]);
-      if (haveALError("setting cone")) return false;
-    }
     return true;
   }
 
@@ -126,17 +112,16 @@ bool PortAudioObject::initSound(PortAudioListener* master)
 // classes for controlled sounds
 void PortAudioObject::iterate(const TimeSpec& ts, const BaseObjectMotion& base)
 {
-  if (source) {
+  if (stream) {
     if (needstart) {
       //std::cerr << "starting play " << spec.name << std::endl;
-      alSourcePlay(source);
-      haveALError("playing");
+      //alSourcePlay(source);
+      //haveALError("playing");
+      Pa_StartStream(stream);
       needstart = false;
     }
     else {
-      ALint source_state;
-      alGetSourcei(source, AL_SOURCE_STATE, &source_state);
-      if (source_state == AL_PLAYING) {
+      if (Pa_IsStreamActive(stream)) {
         std::cerr << "playing " << spec.name << std::endl;
       }
     }
@@ -145,14 +130,8 @@ void PortAudioObject::iterate(const TimeSpec& ts, const BaseObjectMotion& base)
 
 void PortAudioObject::silence()
 {
-  if (source) {
-    ALint state;
-    alGetSourcei(source, AL_SOURCE_STATE, &state);
-    if (state == AL_PLAYING) {
-      alSourceStop(source);
-      //std::cerr << "stopping " << spec.name << std::endl;
-      haveALError("stopping");
-    }
+  if (stream && Pa_IsStreamActive(stream)) {
+    Pa_StopStream(stream);
     needstart = true;
   }
 }

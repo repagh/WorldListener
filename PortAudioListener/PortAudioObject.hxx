@@ -2,11 +2,11 @@
 /*      item            : PortAudioObject.hxx
         made by         : Rene van Paassen
         date            : 171112
-	category        : header file 
-        description     : 
-	changes         : 171112 first version
+        category        : header file
+        description     :
+        changes         : 171112 first version
         language        : C++
-	copyright       : (c) 2017 TUDelft-AE-C&S
+        copyright       : (c) 2017 TUDelft-AE-C&S
 */
 
 #ifndef PortAudioObject_hxx
@@ -23,21 +23,21 @@ OPEN_NS_WORLDLISTENER;
 class PortAudioListener;
 
 /** Base class for PortAudio source objects that are controlled from the
-    simulation. 
+    simulation.
 
-    By itself this implements a basic sound object, with a position and speed, 
+    By itself this implements a basic sound object, with a position and speed,
     sound amplitude and pitch somewhere in the world.
 */
 class PortAudioObject: public WorldObjectBase
 {
 protected:
-  
+
   // source id
   PaStream *stream;
 
   // audio buffer
   PortAudioBufferManager::buffer_ptr_t buffer;
-  
+
   // data specification
   WorldDataSpec spec;
 
@@ -52,7 +52,10 @@ protected:
 
   // looping property
   bool looping;
-  
+
+  // read index
+  unsigned ridx;
+
 public:
   /** Constructor. By itself this class creates a static sound
 
@@ -69,13 +72,13 @@ public:
   ~PortAudioObject();
 
   /** Initialize the sound
-      
+
       Initialize and start the sound playing, if applicable. May be
-      overridden to provide specific behaviour. 
+      overridden to provide specific behaviour.
 
       @param master Listener with context, etc. */
   virtual bool initSound(PortAudioListener* master);
-  
+
   /** Play, update, recalculate, etc. */
   virtual void iterate(const TimeSpec& ts, const BaseObjectMotion& base);
 
