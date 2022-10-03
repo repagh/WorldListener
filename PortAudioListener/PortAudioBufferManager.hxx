@@ -16,18 +16,40 @@
 #include <string>
 #include <exception>
 #include <sstream>
+#include <portaudio.h>
+#include <sndfile.h>
 
 OPEN_NS_WORLDLISTENER;
 
 class PortAudioBufferManager
 {
+  /** Audio buffer */
+  struct Buffer
+  {
+    /** soundfile info */
+    SF_INFO info;
+    
+    /** Actual data */
+    SNDFILE* file;
+
+    /** Constructor */
+    Buffer(const std::string& name);
+
+    /** Destructor */
+    ~Buffer();
+  };
+
   /** connect the sound file name to a buffer id */
-  typedef std::map<std::string,int> buffermap_t;
+  typedef std::map<std::string,Buffer> buffermap_t;
 
   /** connect the sound file to a buffer id */
   buffermap_t buffers;
-  
+	
 public:
+
+  /** Buffer pointer */
+  typedef const Buffer&  buffer_ptr_t;
+  
   /** Constructor */
   PortAudioBufferManager();
 
@@ -42,7 +64,7 @@ public:
       @returns     A buffer id
       @throws      SoundFileReadError, in case the file cannot be read
   */
-  int getBuffer(const std::string& fname);
+  const buffer_ptr_t getBuffer(const std::string& fname);
 };
 
 

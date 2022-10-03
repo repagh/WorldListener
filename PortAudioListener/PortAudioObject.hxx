@@ -35,6 +35,9 @@ protected:
   // source id
   PaStream *stream;
 
+  // audio buffer
+  PortAudioBufferManager::buffer_ptr_t buffer;
+  
   // data specification
   WorldDataSpec spec;
 
