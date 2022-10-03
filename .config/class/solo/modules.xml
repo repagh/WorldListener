@@ -22,6 +22,7 @@
     <module>ControlMotion</module>
     <module pseudo="true">PA34_sounds</module>
     <module>SoundRecorder</module>
+    <module>PortAudioListener</module>
   </project>
   <project>
     <url>dgrpub:///WorldView.git</url>
