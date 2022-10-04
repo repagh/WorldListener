@@ -55,7 +55,7 @@ void PortAudioObject::addData(float* out, unsigned dataCount)
     out[ii] = base_volume * buffer->data[ridx];
     ii += num_channels; ridx++;
   }
-}  
+}
 
 bool PortAudioObject::initSound(PortAudioListener* master)
 {
@@ -70,7 +70,7 @@ bool PortAudioObject::initSound(PortAudioListener* master)
       return false;
     }
   }
-  
+
   channel = unsigned(spec.coordinates[0]);
   num_channels = master->getNumChannels();
 

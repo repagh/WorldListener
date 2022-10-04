@@ -85,6 +85,7 @@ public:
   /** Stop, reset, etc. */
   virtual void silence();
 
+  /** Pass data for playing on the card. */
   virtual void addData(float* out, unsigned frameCount);
 
   /** Name */

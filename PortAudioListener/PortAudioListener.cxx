@@ -46,18 +46,18 @@ PortAudioListener::PortAudioListener() :
 }
 
 int PortAudioListener::cfun(const void *input, void *output,
-			    unsigned long frameCount,
-			    const PaStreamCallbackTimeInfo* timeinfo,
-			    PaStreamCallbackFlags statusFlags, void *userdata)
+                            unsigned long frameCount,
+                            const PaStreamCallbackTimeInfo* timeinfo,
+                            PaStreamCallbackFlags statusFlags, void *userdata)
 {
   auto self = reinterpret_cast<PortAudioListener*>(userdata);
 
   // convert to float
   auto out = reinterpret_cast<float*>(output);
-  
+
   // initially zero the output
   std::fill(out, out+frameCount*self->num_channels, 0.0f);
-  
+
   // run over all sound objects, let them add data to the buffer
   for (auto &o: self->named_objects) {
     o.second->addData(out, frameCount*self->num_channels);
@@ -67,7 +67,7 @@ int PortAudioListener::cfun(const void *input, void *output,
   for (auto &o: self->other_sources) {
     o->addData(out, frameCount*self->num_channels);
   }
-  
+
   // always continue
   return paContinue;
 }
@@ -91,9 +91,9 @@ bool PortAudioListener::init()
   for (auto i = 0; i < ndev; i++) {
     auto devinfo = Pa_GetDeviceInfo(i);
     I_MOD("Dev " << i << " \"" << devinfo->name <<
-	  " hostapi: " << Pa_GetHostApiInfo(devinfo->hostApi)->name <<
-	  " in: " << devinfo->maxInputChannels <<
-	  " out: " << devinfo->maxOutputChannels);
+          " hostapi: " << Pa_GetHostApiInfo(devinfo->hostApi)->name <<
+          " in: " << devinfo->maxInputChannels <<
+          " out: " << devinfo->maxOutputChannels);
     if (std::string(devinfo->name) == devicename) {
       I_MOD("Selecting device " << i);
       idevice = i;
@@ -122,7 +122,7 @@ bool PortAudioListener::init()
 }
 
 
-    
+
 void PortAudioListener::setBase(const BaseObjectMotion& listener)
 {
   // not relevant here
@@ -184,7 +184,7 @@ bool PortAudioListener::createControllable
     // connect to the DUECA infrastructure/channels
     op->connect(master_id, cname, entry_id, time_aspect);
 
-    // initialize with the sound system    
+    // initialize with the sound system
     if (idevice >= 0) {
       op->initSound(this);
     }
