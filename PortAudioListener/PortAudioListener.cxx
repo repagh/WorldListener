@@ -45,6 +45,34 @@ PortAudioListener::PortAudioListener() :
   //
 }
 
+int PortAudioListener::cfun(const void *input, void *output,
+			    unsigned long frameCount,
+			    const PaStreamCallbackTimeInfo* timeinfo,
+			    PaStreamCallbackFlags statusFlags, void *userdata)
+{
+  auto self = reinterpret_cast<PortAudioListener*>(userdata);
+
+  // convert to float
+  auto out = reinterpret_cast<float*>(output);
+  
+  // initially zero the output
+  std::fill(out, out+frameCount*self->num_channels, 0.0f);
+  
+  // run over all sound objects, let them add data to the buffer
+  for (auto &o: self->named_objects) {
+    o.second->addData(out, frameCount*self->num_channels);
+  }
+
+  // optionally also for static sound objects
+  for (auto &o: self->other_sources) {
+    o->addData(out, frameCount*self->num_channels);
+  }
+  
+  // always continue
+  return paContinue;
+}
+
+
 bool PortAudioListener::init()
 {
   auto err = Pa_Initialize();
@@ -72,7 +100,24 @@ bool PortAudioListener::init()
     }
   }
 
-  // using a stream per sound??
+  PaStreamParameters out_param {
+    .device = idevice,
+      .channelCount = num_channels,
+      .sampleFormat = paFloat32,
+      .suggestedLatency = 0};
+
+  // create a stream
+  err = Pa_OpenStream
+    (&stream, NULL, &out_param,
+     samplerate, paFramesPerBufferUnspecified,
+     paNoFlag, cfun, this);
+
+  if (err != paNoError) {
+    E_MOD("Error opening stream: " << Pa_GetErrorText(err));
+    return false;
+  }
+
+  // initialisation done
   return true;
 }
 

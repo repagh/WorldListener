@@ -11,6 +11,7 @@
 
 #define OpenALBufferManager_cxx
 #include "OpenALBufferManager.hxx"
+#include "../WorldListener/AudioExceptions.hxx"
 
 #include <SDL_audio.h>
 #include <sstream>
@@ -97,25 +98,5 @@ ALuint OpenALBufferManager::getBuffer(const std::string& fname)
   
   throw(SoundFileReadError(fname, "cannot read file type"));
 }
-
-SoundFileReadError::SoundFileReadError(const std::string& file,
-                                       const char* message)
-{
-  std::stringstream msgb;
-  msgb << "Error '" << message << "' reading file '" << file << "'";
-  msg = msgb.str();
-}
-
-SoundFileReadError::SoundFileReadError(const SoundFileReadError& o) :
-  msg(o.msg)
-{ }
-
-SoundFileReadError::~SoundFileReadError() _NOEXCEPT
-{
-  //
-}
-const char* SoundFileReadError::what() const throw()
-{ return msg.c_str(); }
-
 
 CLOSE_NS_WORLDLISTENER;

@@ -13,6 +13,7 @@
 #include "OpenALObject.hxx"
 #include "OpenALListener.hxx"
 #include <debug.h>
+#include "../WorldListener/AudioExceptions.hxx"
 
 OPEN_NS_WORLDLISTENER;
 

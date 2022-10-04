@@ -32,10 +32,13 @@ class PortAudioObject: public WorldObjectBase
 {
 protected:
 
-  // source id
-  PaStream *stream;
+  // channel to write
+  unsigned channel;
 
-  // audio buffer
+  // number of channels
+  unsigned num_channels;
+
+  // buffer with audio play data
   PortAudioBufferManager::buffer_ptr_t buffer;
 
   // data specification
@@ -46,9 +49,6 @@ protected:
 
   // internal error report & check
   bool haveError(int err, const char* stage="");
-
-  // has the sound been played
-  bool needstart;
 
   // looping property
   bool looping;
@@ -84,6 +84,8 @@ public:
 
   /** Stop, reset, etc. */
   virtual void silence();
+
+  virtual void addData(float* out, unsigned frameCount);
 
   /** Name */
   inline const std::string& getName() { return spec.name; }

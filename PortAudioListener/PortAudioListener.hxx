@@ -44,6 +44,8 @@ class PortAudioBufferManager;
 class PortAudioListener: public ListenerBase
 {
 private: // simulation data
+  // source id
+  PaStream *stream;
 
 protected:
   /** String defining the default device */
@@ -52,6 +54,12 @@ protected:
   /** Device enumerator */
   int idevice;
 
+  /** Number of channels */
+  int num_channels;
+
+  /** Sample rate, same for all sources */
+  unsigned samplerate;
+  
   /** Accept unknown/unconfigured objects */
   bool allow_unknown;
 
@@ -127,6 +135,16 @@ public: // construction and further specification
 
   /** Access the buffer manager */
   inline PortAudioBufferManager& getBufferManager() {return *buffermanager;}
+
+  /** Callback Function */
+  static int cfun(const void *input, void *output,
+		  unsigned long frameCount,
+		  const PaStreamCallbackTimeInfo* timeinfo,
+		  PaStreamCallbackFlags statusFlags, void *userdata);
+
+  /** Number of channels on the device */
+  inline unsigned getNumChannels() const { return num_channels; }
+  
 };
 
 CLOSE_NS_WORLDLISTENER;

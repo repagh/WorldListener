@@ -15,6 +15,7 @@
 #include <sstream>
 #define I_MOD
 #include <debug.h>
+#include "../WorldListener/AudioExceptions.hxx"
 
 OPEN_NS_WORLDLISTENER;
 
@@ -38,6 +39,11 @@ PortAudioBufferManager::Buffer::Buffer(const std::string& fname)
   data.resize(info.frames*info.channels);
   sf_readf_float(file, data.data(), info.frames);
   sf_close(file);
+}
+
+PortAudioBufferManager::Buffer::~Buffer()
+{
+  //
 }
 
 const PortAudioBufferManager::buffer_ptr_t
@@ -65,25 +71,5 @@ PortAudioBufferManager::getBuffer(const std::string& fname)
 
   //throw(SoundFileReadError(fname, "cannot read file type"));
 }
-
-SoundFileReadError::SoundFileReadError(const std::string& file,
-                                       const char* message)
-{
-  std::stringstream msgb;
-  msgb << "Error '" << message << "' reading file '" << file << "'";
-  msg = msgb.str();
-}
-
-SoundFileReadError::SoundFileReadError(const SoundFileReadError& o) :
-  msg(o.msg)
-{ }
-
-SoundFileReadError::~SoundFileReadError() _NOEXCEPT
-{
-  //
-}
-const char* SoundFileReadError::what() const throw()
-{ return msg.c_str(); }
-
 
 CLOSE_NS_WORLDLISTENER;

@@ -16,7 +16,6 @@
 #include <AL/alc.h>
 #include <map>
 #include <string>
-#include <exception>
 #include <sstream>
 
 OPEN_NS_WORLDLISTENER;
@@ -45,22 +44,6 @@ public:
       @throws      SoundFileReadError, in case the file cannot be read
   */
   ALuint getBuffer(const std::string& fname);
-};
-
-
-#ifndef _NOEXCEPT
-#define _NOEXCEPT throw()
-#endif
-
-/** Exception for sound file processing */
-class SoundFileReadError: public std::exception
-{
-  std::string msg;
-public:
-  SoundFileReadError(const std::string& file, const char* msg);
-  SoundFileReadError(const SoundFileReadError& o);
-  ~SoundFileReadError() _NOEXCEPT;
-  const char* what() const throw();
 };
 
 CLOSE_NS_WORLDLISTENER;
