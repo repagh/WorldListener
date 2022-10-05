@@ -30,7 +30,9 @@ PortAudioBufferManager::~PortAudioBufferManager()
 
 }
 
-PortAudioBufferManager::Buffer::Buffer(const std::string& fname)
+PortAudioBufferManager::Buffer::Buffer(const std::string& fname) :
+  info({}),
+  data()
 {
   SNDFILE* file = sf_open(fname.c_str(), SFM_READ, &info);
   if (!file) {

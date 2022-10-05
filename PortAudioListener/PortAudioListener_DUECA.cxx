@@ -87,9 +87,9 @@ const ParameterTable* PortAudioListener_DUECA::getParameterTable()
       (&_ThisObject_::addCoordinates),
       "optionally add coordinates to the latest created objectclass with\n"
       "\"add-object-class-data\". For default sound classes, you can define\n"
-      "the following groups. Note that these are optional.\n"
-      "Defaults given in parentheses:\n"
-      "* channel: c (channel number)"
+      "the following groups.\n"
+      "* channel: c (channel number)\n"
+      "* volume: between 0.0 and 1.0"
     },
 
     { "set-coordinates",
@@ -121,7 +121,12 @@ const ParameterTable* PortAudioListener_DUECA::getParameterTable()
        name and MemberCall/VarProbe object. The description is used to
        give an overall description of the module. */
     { NULL, NULL,
-      "This helper class provides a sound interface to PortAudio"} };
+      "This helper class provides a sound interface to PortAudio\n"
+      "Instead of using spatial audio, like the OpenAL interface, this\n"
+      "interface uses assignment to (single) speakers. Only mono files\n"
+      "can be played, speaker selection and volume can be made."
+    }
+  };
 
   return parameter_table;
 }
@@ -239,7 +244,7 @@ inline double limit(double dmin, double dval, double dmax)
 
 bool PortAudioListener_DUECA::setGain(const double& g)
 {
-  spec.coordinates[6] = limit(0.0, g, 1.0);
+  spec.coordinates[1] = limit(0.0, g, 1.0);
   return true;
 }
 
