@@ -54,7 +54,7 @@ void PortAudioObject::addData(float* out, unsigned dataCount)
 {
   unsigned ii = channel;
   while (ii < dataCount && ridx < buffer->info.frames) {
-    out[ii] = base_volume * buffer->data[ridx];
+    out[ii] += base_volume * buffer->data[ridx];
     ii += num_channels; ridx++;
     if (looping && ridx == buffer->info.frames) { ridx = 0; }
   }
@@ -72,12 +72,17 @@ bool PortAudioObject::initSound(PortAudioListener* master)
       W_MOD("cannot init '" << spec.name << "' " << e.what());
       return false;
     }
-
-    channel = unsigned(spec.coordinates[0]);
+    
+    if (spec.coordinates.size() >= 1) {
+      channel = unsigned(spec.coordinates[0]);
+    }
     num_channels = master->getNumChannels();
     if (channel >= num_channels) {
       W_MOD("cannot create sound, channel " << channel << " not available");
       return false;
+    }
+    if (spec.coordinates.size() >= 2) {
+      base_volume = spec.coordinates[1];
     }
 
     // should be OK

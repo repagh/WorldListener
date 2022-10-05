@@ -174,7 +174,7 @@ bool PortAudioListener_DUECA::completeSound()
 }
 
 bool PortAudioListener_DUECA::addStaticSound(const std::vector<std::string>&
-                                          names)
+					     names)
 {
   if (!completeSound()) return false;
   nexttype = StaticSound;
@@ -186,9 +186,8 @@ bool PortAudioListener_DUECA::addStaticSound(const std::vector<std::string>&
   spec.type = "static";
   spec.filename.resize(0);
   spec.filename.push_back(names[1]);
-  spec.coordinates.resize(0);
-  spec.coordinates.resize(1, 0.0);
-  spec.coordinates[2] = 0.999999f;
+  spec.coordinates.resize(2, 0.0);
+  spec.coordinates[1] = 0.999999f;
   return true;
 }
 
@@ -207,7 +206,10 @@ bool PortAudioListener_DUECA::setCoordinates(const std::vector<double>& coords)
     E_MOD("Need 2 coordinate values (channel number, volume)");
     return false;
   }
-  std::copy(coords.begin(), coords.end(), spec.coordinates.begin());
+  spec.coordinates.resize(2);
+  spec.coordinates[0] = coords[0];
+  spec.coordinates[1] = coords[1];
+  //std::copy(coords.begin(), coords.end(), spec.coordinates.begin());
   return true;
 }
 

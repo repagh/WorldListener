@@ -18,7 +18,9 @@
 OPEN_NS_WORLDLISTENER;
 
 PortAudioObjectFixed::PortAudioObjectFixed(const WorldDataSpec& spec) :
-  PortAudioObject(spec)
+  PortAudioObject(spec),
+  r_audio(),
+  volume(0.0f)
 {
   //
 }
@@ -35,6 +37,7 @@ void PortAudioObjectFixed::connect(const GlobalId& master_id,
                                    Channel::EntryTimeAspect time_aspect)
 {
   looping = looping || (time_aspect == Channel::Continuous);
+  ridx = 0;
 
   r_audio.reset(new ChannelReadToken
                 (master_id, cname, AudioObjectFixed::classname, entry_id,
@@ -46,23 +49,17 @@ void PortAudioObjectFixed::iterate(const TimeSpec& ts,
                                    const BaseObjectMotion& base)
 {
   if (r_audio->isValid()) {
-    if (looping || r_audio->getNumVisibleSets(ts.getValidityStart()) ) {
+    if (r_audio->getNumVisibleSets(ts.getValidityStart()) ) {
       try {
         // access the data, read latest matching, but accept older data
         DataReader<AudioObjectFixed,MatchIntervalStartOrEarlier>
           r(*r_audio, ts);
 
-	// event based, replay this sound
-        if (!looping) {
+	// event based, replay this sound from start
+        if (!looping) { ridx = 0; }
 
-          ridx = 0;
-          volume = base_volume * r.data().volume;
-        }
-        else {
-
-          // continuous play of data, simply adjust sound parameters
-          volume = base_volume * r.data().volume;
-        }
+	// continuous play of data, simply adjust sound parameters
+	volume = base_volume * r.data().volume;
       }
       catch (const NoDataAvailable& e) {
         I_MOD("no audio data for " << spec.name);
@@ -81,7 +78,7 @@ void PortAudioObjectFixed::addData(float* out, unsigned dataCount)
 {
   unsigned ii = channel;
   while (ii < dataCount && ridx < buffer->info.frames) {
-    out[ii] = volume * buffer->data[ridx];
+    out[ii] += volume * buffer->data[ridx];
     ii += num_channels; ridx++;
     if (looping && ridx == buffer->info.frames) { ridx = 0; }
   }
