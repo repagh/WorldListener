@@ -49,15 +49,10 @@ void PortAudioObjectFixed::iterate(const TimeSpec& ts,
     if (looping || r_audio->getNumVisibleSets(ts.getValidityStart()) ) {
       try {
         // access the data, read latest matching, but accept older data
-#if DUECA_VERSION_NUM >= DUECA_VERSION(2,5,0)
         DataReader<AudioObjectFixed,MatchIntervalStartOrEarlier>
-#else
-        DataReader<AudioObjectFixed,
-                   MatchIntervalStartOrEarlier<AudioObjectFixed> >
-#endif
           r(*r_audio, ts);
 
-
+	// event based, replay this sound
         if (!looping) {
 
           ridx = 0;
@@ -88,6 +83,7 @@ void PortAudioObjectFixed::addData(float* out, unsigned dataCount)
   while (ii < dataCount && ridx < buffer->info.frames) {
     out[ii] = volume * buffer->data[ridx];
     ii += num_channels; ridx++;
+    if (looping && ridx == buffer->info.frames) { ridx = 0; }
   }
 }
 

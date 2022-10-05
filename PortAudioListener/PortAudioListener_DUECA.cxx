@@ -18,12 +18,6 @@
 #include "PortAudioObjectFixed.hxx"
 #include <limits>
 
-// include the debug writing header. Warning and error messages
-// are on by default, debug and info can be selected by
-// uncommenting the respective defines
-//#define D_MOD
-//#define I_MOD
-#include <debug.h>
 
 // include additional files needed for your calculation here
 
@@ -32,6 +26,15 @@
 #include <MemberCall.hxx>
 #include <MemberCall2Way.hxx>
 #include <CoreCreator.hxx>
+
+// include the debug writing header. Warning and error messages
+// are on by default, debug and info can be selected by
+// uncommenting the respective defines
+//#define D_MOD
+//#define I_MOD
+#include <debug.h>
+
+
 USING_DUECA_NS;
 
 OPEN_NS_WORLDLISTENER;
@@ -46,6 +49,11 @@ const ParameterTable* PortAudioListener_DUECA::getParameterTable()
       (&_ThisObject_::devicename),
       "PortAudio device name" },
 
+    { "set-samplerate",
+      new VarProbe<_ThisObject_,unsigned>
+      (&_ThisObject_::samplerate),
+      "Sample rate for playback" },
+    
     { "add-static-sound",
       new MemberCall<_ThisObject_,std::vector<std::string> >
       (&_ThisObject_::addStaticSound),
@@ -56,17 +64,22 @@ const ParameterTable* PortAudioListener_DUECA::getParameterTable()
       new MemberCall<_ThisObject_,std::vector<std::string> >
       (&_ThisObject_::addControlledStaticSound),
       "Add a sound of which volume and pitch are controlled. Specify\n"
-      "name and filename" },
+      "name and filename. The label of an entry in the controlling channel\n"
+      "should match the name"
+    },
 
     { "add-object-class-data",
       new MemberCall<_ThisObject_,std::vector<string> >
       (&_ThisObject_::addObjectClassData),
       "Create a new class (type) of simple objects, i.e. those that can be\n"
       "represented by one or more sound files. Specify the following\n"
-      "- <DCO classname>[:objectname]. This is used to match to either\n"
-      "  DCO classname (all objects look like this) or DCO classname+label\n"
+      "- A key to link this type of sound to a channel entry. This may take\n"
+      "  one of the following forms:\n"
+      "  * <DCO classname>:<label>. Match the class of the DCO object, with"
+      "    the label. If no match is found, parent class names are tried.\n"
+      "  * <DCO classname>. Only match on the class of the DCO object.\n"
       "- Object name, if not empty, overrides the name given in the label\n"
-      "- Sound object class name, must be defined in the factory\n"
+      "- Sound object class name, must match a type defined in the factory\n"
       "- Sound file name[s]\n" },
 
     { "add-object-class-coordinates",

@@ -66,6 +66,9 @@ protected:
   /** Buffer manager */
   boost::scoped_ptr<PortAudioBufferManager> buffermanager;
 
+  /** Status of sound */
+  bool sound_off;
+  
 protected:
   /** type for map with named sound objects; these are created through the
       interface, and may later be attached to channel entries,

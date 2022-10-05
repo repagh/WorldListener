@@ -39,8 +39,11 @@ OPEN_NS_WORLDLISTENER;
 PortAudioListener::PortAudioListener() :
   devicename(),
   idevice(-1),
+  num_channels(0),
+  samplerate(44100),
   allow_unknown(false),
-  buffermanager()
+  buffermanager(new PortAudioBufferManager()),
+  sound_off(true)
 {
   //
 }
@@ -59,7 +62,7 @@ int PortAudioListener::cfun(const void *input, void *output,
   std::fill(out, out+frameCount*self->num_channels, 0.0f);
 
   // run over all sound objects, let them add data to the buffer
-  for (auto &o: self->named_objects) {
+  for (auto &o: self->controlled_sources) {
     o.second->addData(out, frameCount*self->num_channels);
   }
 
@@ -91,12 +94,13 @@ bool PortAudioListener::init()
   for (auto i = 0; i < ndev; i++) {
     auto devinfo = Pa_GetDeviceInfo(i);
     I_MOD("Dev " << i << " \"" << devinfo->name <<
-          " hostapi: " << Pa_GetHostApiInfo(devinfo->hostApi)->name <<
+          "\" hostapi: " << Pa_GetHostApiInfo(devinfo->hostApi)->name <<
           " in: " << devinfo->maxInputChannels <<
           " out: " << devinfo->maxOutputChannels);
     if (std::string(devinfo->name) == devicename) {
       I_MOD("Selecting device " << i);
       idevice = i;
+      num_channels = devinfo->maxOutputChannels;
     }
   }
 
@@ -195,12 +199,12 @@ bool PortAudioListener::createControllable
   }
   catch (const CFCannotMake& problem) {
     if (!allow_unknown) {
-      W_MOD("PortAudioListener: factory cannot create for " << data_class <<
-            " encountered: " <<  problem.what());
+      W_MOD("PortAudioListener: factory cannot create class \"" << data_class <<
+            "\" encountered: " <<  problem.what());
       throw(problem);
     }
-    W_MOD("PortAudioListener: factory cannot create for " << data_class <<
-          ", ignoring this entry");
+    W_MOD("PortAudioListener: factory cannot create class \"" << data_class <<
+          "\", ignoring this entry");
   }
   catch (const MapSpecificationError& problem) {
     if (!allow_unknown) {
@@ -246,6 +250,15 @@ void PortAudioListener::removeControllable(uint32_t creation_id)
 
 void PortAudioListener::iterate(const TimeSpec& ts)
 {
+  if (sound_off) {
+    I_MOD("Starting stream, first iterate");
+    auto err = Pa_StartStream(stream);
+    if (err != paNoError) {
+      E_MOD("Error starting PortAudio stream: " << Pa_GetErrorText(err));
+    }
+    sound_off = false;
+  }
+    
   for (controllables_t::iterator ii = controlled_sources.begin();
        ii != controlled_sources.end(); ii++) {
     ii->second->iterate(ts, listener);
@@ -258,6 +271,15 @@ void PortAudioListener::iterate(const TimeSpec& ts)
 
 void PortAudioListener::silence(const TimeSpec& ts)
 {
+  if (!sound_off) {
+    I_MOD("Stopping stream, first silence");
+    auto err = Pa_StopStream(stream);
+    if (err != paNoError) {
+      E_MOD("Error starting PortAudio stream: " << Pa_GetErrorText(err));
+    }
+    sound_off = true;
+  }
+  
   for (controllables_t::iterator ii = controlled_sources.begin();
        ii != controlled_sources.end(); ii++) {
     ii->second->silence();

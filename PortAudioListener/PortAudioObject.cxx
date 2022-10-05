@@ -14,6 +14,7 @@
 
 #define PortAudioObject_cxx
 #include "PortAudioObject.hxx"
+#include "PortAudioObjectFactory.hxx"
 #include "PortAudioListener.hxx"
 #include "../WorldListener/AudioExceptions.hxx"
 #include <debug.h>
@@ -25,7 +26,8 @@ PortAudioObject::PortAudioObject(const WorldDataSpec& spec) :
   buffer(NULL),
   spec(spec),
   base_volume(0.999999f),
-  looping(spec.type.find("looping") != string::npos)
+  looping(spec.type.find("looping") != string::npos),
+  ridx(0U)
 {
   // looping is determined here, since it may be overridden
   // in derived classes "connect"
@@ -54,6 +56,7 @@ void PortAudioObject::addData(float* out, unsigned dataCount)
   while (ii < dataCount && ridx < buffer->info.frames) {
     out[ii] = base_volume * buffer->data[ridx];
     ii += num_channels; ridx++;
+    if (looping && ridx == buffer->info.frames) { ridx = 0; }
   }
 }
 
@@ -69,10 +72,17 @@ bool PortAudioObject::initSound(PortAudioListener* master)
       W_MOD("cannot init '" << spec.name << "' " << e.what());
       return false;
     }
-  }
 
-  channel = unsigned(spec.coordinates[0]);
-  num_channels = master->getNumChannels();
+    channel = unsigned(spec.coordinates[0]);
+    num_channels = master->getNumChannels();
+    if (channel >= num_channels) {
+      W_MOD("cannot create sound, channel " << channel << " not available");
+      return false;
+    }
+
+    // should be OK
+    return true;
+  }
 
   // not specified, cannot create
   return false;
@@ -87,7 +97,7 @@ void PortAudioObject::iterate(const TimeSpec& ts, const BaseObjectMotion& base)
 
 void PortAudioObject::silence()
 {
-  //
+  if (looping) { ridx = 0; }
 }
 
 const std::string& PortAudioObject::getChannelClass()
@@ -95,5 +105,9 @@ const std::string& PortAudioObject::getChannelClass()
   const static std::string empty("");
   return empty;
 }
+
+static auto *PortAudioObject_maker = new
+  SubContractor<PortAudioObjectTypeKey, PortAudioObject>
+  ("PortAudioObject");
 
 CLOSE_NS_WORLDLISTENER;

@@ -136,6 +136,7 @@ WorldListener::WorldListener(Entity* e, const char* part, const
   w_logconfig(),
 #endif
   keep_running(false),
+  stick_to_running(false),
   // a callback object, pointing to the main calculation function
   cb1(this, &_ThisModule_::doCalculation),
   // the module's main activity
@@ -360,7 +361,7 @@ void WorldListener::doCalculation(const TimeSpec& ts)
 
   switch(getAndCheckState(ts)) {
   case SimulationState::HoldCurrent:
-    if (keep_running) {
+    if (stick_to_running) {
       listener->iterate(ts);
     }
     else {
@@ -380,6 +381,7 @@ void WorldListener::doCalculation(const TimeSpec& ts)
   case SimulationState::Advance:
     // now run over the other entities and update/read
     listener->iterate(ts);
+    stick_to_running = keep_running;
 #if defined(DUECA_CONFIG_HDF5)
     sendlogcontrol = true;
 #endif

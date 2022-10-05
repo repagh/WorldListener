@@ -69,36 +69,12 @@ if this_node_id == ecs_node:
         "motion-control", "", admin_priority).param(
             ('set_timing', display_timing),
             ('check_timing', (10000, 20000)),
-            ('add-moving-sound', "mosquito"),
-            ('set-coordinates', (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0.5)),
-            ('set-dt', 0.1),
-            ( 'add-fixed-sound', "rpm1left"),
-            ('add-fixed-sound', "rpm2left"),
+            ('add-fixed-sound', "rpm1left"),
             ('add-fixed-sound', "rpm1right"),
-            ('add-fixed-sound', "rpm2right"),
             ('add-fixed-sound', "gearup"),
-            ('event-interval', 50),
+            ('event-interval', 500),
             ('add-fixed-sound', "geardown"),
-            ('event-interval', 53),
-            ('add-fixed-sound', "shutdown_left"),
-            ('event-interval', 59),
-            ('add-fixed-sound', "shutdown_right"),
-            ('event-interval', 43),
-            ('add-fixed-sound', "damage"),
-            ('event-interval', 19),
-            ('add-fixed-sound', "mass"),
-            ('event-interval', 61),
-            ('add-fixed-sound', "flaps"),
-            ('event-interval', 64),
-            ('add-fixed-sound', "wind"),
-            ('add-fixed-sound', "wind_gear"),
-            ('add-fixed-sound', "stall"),
-            ('event-interval', 66),
-            ('add-fixed-sound', "overspeed"),
-            ('event-interval', 69),
-            ('add-fixed-sound', "wheels"),
-            ('event-interval', 71),
-            ('add-fixed-sound', "touchdown"),
+            ('event-interval', 530),
         ))
 
     mymods.append(dueca.Module(
@@ -108,7 +84,8 @@ if this_node_id == ecs_node:
             ('control-logger', "HDFLogConfig://ph-sound"),
             ('set-listener',
              dueca.PortAudioListener().param(
-                 ('set-devicename', "Xonar DX, Multichannel (CARD=DX,DEV=0)"),
+                 ('set-devicename',
+                  "Logitech Stereo H650e: USB Audio (hw:0,0)"),
 
                  # old style hacks, link to the label
                  ('add-controlled-static-sound', (
@@ -118,9 +95,19 @@ if this_node_id == ecs_node:
                  ('add-controlled-static-sound', (
                      "rpm1right", "PA34_rpm1_right.wav")),
                  ('set-coordinates', ( 1, 1.0)),
-
+                 
+                 # new style, use factory, and let type+label be key
+                 ('add-object-class-data', (
+                     "AudioObjectFixed:gearup", "", "PortAudioObjectFixed",
+                     "PA34_gear_up.wav")),
+                 ('add-object-class-coordinates', (0, 0.07)),
+                 ('add-object-class-data', (
+                     "AudioObjectFixed:geardown", "", "PortAudioObjectFixed",
+                     "PA34_gear_down.wav")),
+                 ('add-object-class-coordinates', (1, 0.07)),
+                 
              ).complete()),
-            ('keep-running', True),
+            ('keep-running', False),
         ))
 
 
