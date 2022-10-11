@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------   */
-/*      item            : PortAudioObject.hxx
+/*      item            : PortAudioMultiObject.hxx
         made by         : Rene van Paassen
         date            : 171112
         category        : header file
@@ -9,12 +9,13 @@
         copyright       : (c) 2017 TUDelft-AE-C&S
 */
 
-#ifndef PortAudioObject_hxx
-#define PortAudioObject_hxx
+#ifndef PortAudioMultiObject_hxx
+#define PortAudioMultiObject_hxx
 
 #include "../WorldListener/WorldObjectBase.hxx"
 #include <string>
 #include "PortAudioBufferManager.hxx"
+#include "PortAudioObjectFixed.hxx"
 #include <portaudio.h>
 #include <dueca.h>
 #include "comm-objects.h"
@@ -22,38 +23,15 @@
 OPEN_NS_WORLDLISTENER;
 class PortAudioListener;
 
-/** Base class for PortAudio source objects that are controlled from the
-    simulation.
+/** PortAudioMulti source objects that play over multiple channels.
 
-    This implements a sound that is being played on one speaker.
 */
-class PortAudioObject: public WorldObjectBase
+class PortAudioMultiObject: public PortAudioObjectFixed
 {
 protected:
 
-  // channel to write
-  unsigned channel;
-
-  // number of channels
-  unsigned num_channels;
-
-  // buffer with audio play data
-  PortAudioBufferManager::buffer_ptr_t buffer;
-
-  // data specification
-  WorldDataSpec spec;
-
-  // base volume
-  float base_volume;
-
-  // internal error report & check
-  bool haveError(int err, const char* stage="");
-
-  // looping property
-  bool looping;
-
-  // read index
-  unsigned ridx;
+  // channels to write
+  std::vector<float> base_volumes;
 
 public:
   /** Constructor. By itself this class creates a static sound
@@ -65,10 +43,10 @@ public:
                    * coordinates: xyz (3), uvw (3), gain, pitch,
                      dirxyz(3), inner/outer cone angle, outer cone gain
   */
-  PortAudioObject(const WorldDataSpec& spec);
+  PortAudioMultiObject(const WorldDataSpec& spec);
 
   /** Destructor */
-  ~PortAudioObject();
+  ~PortAudioMultiObject();
 
   /** Initialize the sound
 
@@ -81,17 +59,8 @@ public:
   /** Play, update, recalculate, etc. */
   virtual void iterate(const TimeSpec& ts, const BaseObjectMotion& base);
 
-  /** Stop, reset, etc. */
-  virtual void silence();
-
   /** Pass data for playing on the card. */
   virtual void addData(float* out, unsigned frameCount);
-
-  /** Name */
-  inline const std::string& getName() { return spec.name; }
-
-  /** Class of channel, if applicable */
-  virtual const std::string& getChannelClass();
 };
 
 CLOSE_NS_WORLDLISTENER;

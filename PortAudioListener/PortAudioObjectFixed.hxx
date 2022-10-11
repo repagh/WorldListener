@@ -19,6 +19,7 @@ OPEN_NS_WORLDLISTENER;
 
 class PortAudioObjectFixed: public PortAudioObject
 {
+protected:
   /** Channel read token for audio control */
   boost::scoped_ptr<ChannelReadToken>      r_audio;
 
