@@ -51,10 +51,11 @@ public:
 		       Channel::EntryTimeAspect time_aspect) override;
 
   /** Play, update, recalculate, etc. */
-  virtual void iterate(const TimeSpec& ts, const BaseObjectMotion& base);
+  virtual void iterate(const TimeSpec& ts,
+                       const BaseObjectMotion& base) override;
 
   /** Pass data for playing on the card. */
-  virtual void addData(float* out, unsigned frameCount);
+  virtual void addData(float* out, unsigned frameCount) override;
 
   /** Class of channel, if applicable */
   const std::string& getChannelClass();

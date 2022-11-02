@@ -68,22 +68,24 @@ const ParameterTable* OpenALListener_DUECA::getParameterTable()
       new MemberCall<_ThisObject_,std::vector<std::string> >
       (&_ThisObject_::addControlledStaticSound),
       "Add a sound of which volume and pitch are controlled. Specify\n"
-      "name and filename" },
+      "name and filename (obsolete, use add-object-class-data)" },
 
     { "add-controlled-moving-sound",
       new MemberCall<_ThisObject_,std::vector<std::string> >
       (&_ThisObject_::addControlledMovingSound),
       "add a sound of which volume, pitch and movement are controlled.\n"
-      "Specify a name for the sound and filename" },
+      "Specify a name for the sound and filename\n"
+      "(obsolete, use add-object-class-data)" },
 
     { "add-object-class-data",
       new MemberCall<_ThisObject_,std::vector<string> >
       (&_ThisObject_::addObjectClassData),
       "Create a new class (type) of simple objects, i.e. those that can be\n"
       "represented by one or more sound files. Specify the following\n"
-      "- <DCO classname>[:objectname]. This is used to match to either\n"
+      "- <DCO classname>[:label]. This is used to match to either\n"
       "  DCO classname (all objects look like this) or DCO classname+label\n"
       "- Object name, if not empty, overrides the name given in the label\n"
+      "  use # to add an entry number to the name\n"
       "- Sound object class name, must be defined in the factory\n"
       "- Sound file name[s]\n" },
 
@@ -98,7 +100,7 @@ const ParameterTable* OpenALListener_DUECA::getParameterTable()
       "* velocity:         u, v, w (0,0,0)\n"
       "* sound properties: volume (0, range 0-1), relative pitch (1.0)\n"
       "* distance effects: ref dist (1), max dist (flt_max), rollof factor(1)\n"
-      "* cone definition: phi, theta, psi direction, \n"
+      "* cone definition: phi, theta, psi direction,\n"
       "                   cone inner, cone outer, cone gain\n"
     },
 

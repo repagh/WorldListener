@@ -207,14 +207,14 @@ bool PortAudioListener_DUECA::addControlledStaticSound
 
 bool PortAudioListener_DUECA::setCoordinates(const std::vector<double>& coords)
 {
-  if (coords.size() != 2) {
-    E_MOD("Need 2 coordinate values (channel number, volume)");
+  if (coords.size() < 2) {
+    E_MOD("Need at least 2 coordinate values (channel number, volume)");
     return false;
   }
-  spec.coordinates.resize(2);
-  spec.coordinates[0] = coords[0];
-  spec.coordinates[1] = coords[1];
-  //std::copy(coords.begin(), coords.end(), spec.coordinates.begin());
+  spec.coordinates.resize(coords.size());
+  for (unsigned ii = coords.size(); ii--; ) {
+    spec.coordinates[ii] = coords[ii];
+  }
   return true;
 }
 
