@@ -59,7 +59,10 @@ protected:
 
   /** Sample rate, same for all sources */
   unsigned samplerate;
-  
+
+  /** Output latency suggestion */
+  double suggested_output_latency;
+
   /** Accept unknown/unconfigured objects */
   bool allow_unknown;
 
@@ -68,7 +71,7 @@ protected:
 
   /** Status of sound */
   bool sound_off;
-  
+
 protected:
   /** type for map with named sound objects; these are created through the
       interface, and may later be attached to channel entries,
@@ -147,7 +150,7 @@ public: // construction and further specification
 
   /** Number of channels on the device */
   inline unsigned getNumChannels() const { return num_channels; }
-  
+
 };
 
 CLOSE_NS_WORLDLISTENER;

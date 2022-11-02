@@ -53,7 +53,12 @@ const ParameterTable* PortAudioListener_DUECA::getParameterTable()
       new VarProbe<_ThisObject_,unsigned>
       (&_ThisObject_::samplerate),
       "Sample rate for playback" },
-    
+
+    { "suggested-latency",
+      new VarProbe<_ThisObject_,double>
+      (&_ThisObject_::suggested_output_latency),
+      "Output latency setting for the stream, affects buffer size" },
+
     { "add-static-sound",
       new MemberCall<_ThisObject_,std::vector<std::string> >
       (&_ThisObject_::addStaticSound),
@@ -174,7 +179,7 @@ bool PortAudioListener_DUECA::completeSound()
 }
 
 bool PortAudioListener_DUECA::addStaticSound(const std::vector<std::string>&
-					     names)
+                                             names)
 {
   if (!completeSound()) return false;
   nexttype = StaticSound;

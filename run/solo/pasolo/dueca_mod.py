@@ -85,7 +85,7 @@ if this_node_id == ecs_node:
             ('set-listener',
              dueca.PortAudioListener().param(
                  ('set-devicename',
-                  "Logitech Stereo H650e: USB Audio (hw:0,0)"),
+                  "Logitech Stereo H650e: USB Audio (hw:3,0)"),
 
                  # old style hacks, link to the label
                  ('add-controlled-static-sound', (
@@ -95,7 +95,7 @@ if this_node_id == ecs_node:
                  ('add-controlled-static-sound', (
                      "rpm1right", "PA34_rpm1_right.wav")),
                  ('set-coordinates', ( 1, 1.0)),
-                 
+
                  # new style, use factory, and let type+label be key
                  ('add-object-class-data', (
                      "AudioObjectFixed:gearup", "", "PortAudioObjectFixed",
@@ -105,7 +105,7 @@ if this_node_id == ecs_node:
                      "AudioObjectFixed:geardown", "", "PortAudioObjectFixed",
                      "PA34_gear_down.wav")),
                  ('add-object-class-coordinates', (1, 0.07)),
-                 
+
              ).complete()),
             ('keep-running', False),
         ))

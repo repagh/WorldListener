@@ -41,6 +41,7 @@ PortAudioListener::PortAudioListener() :
   idevice(-1),
   num_channels(0),
   samplerate(44100),
+  suggested_output_latency(0.01),
   allow_unknown(false),
   buffermanager(new PortAudioBufferManager()),
   sound_off(true)
@@ -91,8 +92,9 @@ bool PortAudioListener::init()
     return false;
   }
 
+  const PaDeviceInfo *devinfo = NULL;
   for (auto i = 0; i < ndev; i++) {
-    auto devinfo = Pa_GetDeviceInfo(i);
+    devinfo = Pa_GetDeviceInfo(i);
     I_MOD("Dev " << i << " \"" << devinfo->name <<
           "\" hostapi: " << Pa_GetHostApiInfo(devinfo->hostApi)->name <<
           " in: " << devinfo->maxInputChannels <<
@@ -108,7 +110,10 @@ bool PortAudioListener::init()
     .device = idevice,
       .channelCount = num_channels,
       .sampleFormat = paFloat32,
-      .suggestedLatency = 0};
+      .suggestedLatency = min(devinfo->defaultHighOutputLatency,
+                              max(devinfo->defaultLowOutputLatency,
+                                  PaTime(suggested_output_latency)))
+  };
 
   // create a stream
   err = Pa_OpenStream
