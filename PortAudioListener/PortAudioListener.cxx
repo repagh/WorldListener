@@ -101,6 +101,8 @@ bool PortAudioListener::init()
           " out: " << devinfo->maxOutputChannels);
     if (std::string(devinfo->name) == devicename) {
       I_MOD("Selecting device " << i);
+      I_MOD("Output latency " << devinfo->defaultLowOutputLatency
+            << " to " << devinfo->defaultHighOutputLatency);
       idevice = i;
       num_channels = devinfo->maxOutputChannels;
     }
