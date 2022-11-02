@@ -184,8 +184,11 @@ private: // channel access
 #endif
 
   /** "Keep running" flag, will not stop sound production when DUECA
-      process is stopped */
+       is stopped */
   bool                                 keep_running;
+
+  /** Stick_to_advance */
+  bool                                 stick_to_running;
 
 private: // activity allocation
 
