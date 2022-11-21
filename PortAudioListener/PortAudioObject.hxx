@@ -62,8 +62,7 @@ public:
                    * name: for identification
                    * type: looping to indicate looping sound
                    * filename: only 1st element, file for sound
-                   * coordinates: xyz (3), uvw (3), gain, pitch,
-                     dirxyz(3), inner/outer cone angle, outer cone gain
+                   * coordinates: 
   */
   PortAudioObject(const WorldDataSpec& spec);
 

@@ -13,3 +13,4 @@ WorldListener/comm-objects/AudioObjectFixed.dco
 WorldView/comm-objects/BaseObjectPosition.dco  # Added for Policy: 'replace-worldview-dco-position':'21-002'
 
 WorldView/comm-objects/BaseObjectMotion.dco  # Added for Policy: 'replace-worldview-dco-motion':'21-001'
+WorldListener/comm-objects/AudioFileSelection.dco

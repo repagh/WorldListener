@@ -46,9 +46,9 @@ public:
       @param master_id ID for opening a channel reader
       @param cname     Channel with object data
       @param entry_id  Entry in the channel */
-  void connect(const GlobalId& master_id, const NameSet& cname,
-               entryid_type entry_id,
-               Channel::EntryTimeAspect time_aspect);
+  virtual void connect(const GlobalId& master_id, const NameSet& cname,
+		       entryid_type entry_id,
+		       Channel::EntryTimeAspect time_aspect) override;
 
   /** Play, update, recalculate, etc. */
   virtual void iterate(const TimeSpec& ts, const BaseObjectMotion& base);
