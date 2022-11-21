@@ -133,7 +133,7 @@ public: // construction and further specification
   /** Add a constant sound source */
   void addConstantSource(boost::intrusive_ptr<PortAudioObject> op);
 
-  /** Add a constant sound source */
+  /** Add a controlled sound source */
   void addControlledSource(boost::intrusive_ptr<PortAudioObject> op);
 
   /** Update the position of the listener. */

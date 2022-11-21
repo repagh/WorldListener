@@ -110,7 +110,13 @@ if this_node_id == ecs_node:
             ('keep-running', False),
         ))
 
-
+    mymods.append(dueca.Module(
+        "port-audio-test", "", admin_priority).param(
+            ("add-control",
+             ("left-channel", "AnyAudio://ph-sound", "gearup")),
+            ("add-control",
+             ("right-channel", "AnyAudio://ph-sound", "geardown"))
+            ))
 
 # etc, each node can have modules in its mymods list
 

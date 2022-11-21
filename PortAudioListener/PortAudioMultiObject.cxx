@@ -15,13 +15,16 @@
 #include "PortAudioObjectFactory.hxx"
 #include "PortAudioListener.hxx"
 #include "../WorldListener/AudioExceptions.hxx"
+#include "comm-objects.h"
 #include <debug.h>
 
 OPEN_NS_WORLDLISTENER;
 
 PortAudioMultiObject::PortAudioMultiObject(const WorldDataSpec& spec) :
   PortAudioObjectFixed(spec),
-  base_volumes()
+  master(NULL),
+  base_volumes(),
+  r_newfile()
 {
   //
 }
@@ -44,8 +47,11 @@ void PortAudioMultiObject::addData(float* out, unsigned dataCount)
   }
 }
 
-bool PortAudioMultiObject::initSound(PortAudioListener* master)
+bool PortAudioMultiObject::initSound(PortAudioListener* _master)
 {
+  // remember the PA master
+  master = _master;
+  
   // basic initialization first
   if (this->PortAudioObject::initSound(master)) {
 
@@ -61,9 +67,43 @@ bool PortAudioMultiObject::initSound(PortAudioListener* master)
   return false;
 }
 
+void PortAudioMultiObject::connect(const GlobalId& master_id,
+                                   const NameSet& cname,
+                                   entryid_type entry_id,
+                                   Channel::EntryTimeAspect time_aspect)
+{
+  this->PortAudioObjectFixed::connect(master_id, cname, entry_id, time_aspect);
+
+  // when so configured, read an additional file for resetting file name
+  if (spec.filename.size() > 1) {
+    r_newfile.reset
+      (new ChannelReadToken
+       (master_id, NameSet(spec.filename[1]),
+	getclassname<AudioFileSelection>(), r_audio->getEntryLabel(),
+	Channel::Events, Channel::OnlyOneEntry, Channel::ReadAllData));
+  }
+}
+
 void PortAudioMultiObject::iterate(const TimeSpec& ts,
 				   const BaseObjectMotion& base)
 {
+  if (r_newfile && r_newfile->isValid() && r_newfile->haveVisibleSets(ts)) {
+    try {
+      DataReader<AudioFileSelection> nf(*r_newfile, ts);
+      try {
+	assert(master != NULL);
+	buffer = master->getBufferManager().getBuffer(nf.data().filename);
+	ridx = 0U;
+      }
+      catch (const SoundFileReadError& e) {
+	W_MOD("cannot load '" << nf.data().filename << "' " << e.what());
+      }
+    }
+    catch (const NoDataAvailable& e) {
+      W_MOD("Error reading '" << r_newfile->getName() << "' " << e.what());
+    }
+  }
+  
   if (r_audio->isValid()) {
     if (r_audio->getNumVisibleSets(ts.getValidityStart()) ) {
       try {

@@ -135,10 +135,17 @@ bool MotionControl::complete()
       gtk_callback(&_ThisModule_::changePositionOrientation), gpointer(5) },
     { NULL, NULL, NULL, NULL }
   };
+#if GTK_MAJOR_VERSION == 3
+  viewcontrol.readGladeFile
+    ("../../../../WorldListener/ControlMotion/motioncontrol.ui",
+     "viewcontrol", this, controls);
+#elif GTK_MAJOR_VERSION == 2
   viewcontrol.readGladeFile
     ("../../../../WorldListener/ControlMotion/motioncontrol.glade",
      "viewcontrol", this, controls);
-
+#else
+#error "MotionControl not adapted to this gtk version"
+#endif
   /* All your parameters have been set. You may do extended
      initialisation here. Return false if something is wrong. */
   return completeSound();

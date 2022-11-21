@@ -84,7 +84,8 @@ const ParameterTable* WorldListener::getMyParameterTable()
       (&_ThisModule_::addWorldInformationChannel),
       "Add one or more world info channels. If not used, only the default\n"
       "AnyAudioClass://audio channel is monitored, if used, and you need this\n"
-      "channel, explicitly add it" },
+      "channel, explicitly add the channel names. Note that the argument\n"
+      "must be iterable (tuple or list in Python)"},
 
 #if defined(DUECA_CONFIG_HDF5)
     { "control-logger",
