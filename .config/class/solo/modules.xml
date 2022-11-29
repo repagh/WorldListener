@@ -15,7 +15,7 @@
 -->
 <machine xmlns="https://dueca.tudelft.nl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://dueca.tudelft.nl modules.xsd">
   <project>
-    <url>remote:///WorldListener.git</url>
+    <url>origin:///WorldListener.git</url>
     <module pseudo="true">doc</module>
     <module>WorldListener</module>
     <module>OpenALListener</module>
@@ -23,6 +23,7 @@
     <module pseudo="true">PA34_sounds</module>
     <module>SoundRecorder</module>
     <module>PortAudioListener</module>
+    <module>AudioTestGui</module>
   </project>
   <project>
     <url>dgrpub:///WorldView.git</url>

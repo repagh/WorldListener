@@ -69,12 +69,12 @@ if this_node_id == ecs_node:
         "motion-control", "", admin_priority).param(
             ('set_timing', display_timing),
             ('check_timing', (10000, 20000)),
-            ('add-fixed-sound', "rpm1left"),
-            ('add-fixed-sound', "rpm1right"),
-            ('add-fixed-sound', "gearup"),
-            ('event-interval', 500),
-            ('add-fixed-sound', "geardown"),
-            ('event-interval', 530),
+            #('add-fixed-sound', "rpm1left"),
+            #('add-fixed-sound', "rpm1right"),
+            #('add-fixed-sound', "gearup"),
+            #('event-interval', 500),
+            #('add-fixed-sound', "geardown"),
+            #('event-interval', 530),
         ))
 
     mymods.append(dueca.Module(
@@ -88,13 +88,13 @@ if this_node_id == ecs_node:
                   "Logitech Stereo H650e: USB Audio (hw:3,0)"),
 
                  # old style hacks, link to the label
-                 ('add-controlled-static-sound', (
-                     "rpm1left", "PA34_rpm1_left.wav")),
-                 ( 'set-coordinates', ( 0, 1.0 )),
+                 # ('add-controlled-static-sound', (
+                 #     "rpm1left", "PA34_rpm1_left.wav")),
+                 # ( 'set-coordinates', ( 0, 1.0 )),
 
-                 ('add-controlled-static-sound', (
-                     "rpm1right", "PA34_rpm1_right.wav")),
-                 ('set-coordinates', ( 1, 1.0)),
+                 # ('add-controlled-static-sound', (
+                 #     "rpm1right", "PA34_rpm1_right.wav")),
+                 # ('set-coordinates', ( 1, 1.0)),
 
                  # new style, use factory, and let type+label be key
                  ('add-object-class-data', (
@@ -105,12 +105,26 @@ if this_node_id == ecs_node:
                      "AudioObjectFixed:geardown", "", "PortAudioObjectFixed",
                      "PA34_gear_down.wav")),
                  ('add-object-class-coordinates', (1, 0.07)),
+                 ('add-object-class-data', (
+                     "AudioObjectFixed:gearmulti", "", "PortAudioMultiObject",
+                     "PA34_gear_down.wav",
+                     "AudioFileSelection://ph-sound")),
+                 ('add-object-class-coordinates', (0.1, 0.1)),
 
              ).complete()),
             ('keep-running', False),
         ))
 
-
+    mymods.append(dueca.Module(
+        "audio-test-gui", "", admin_priority).param(
+            ("add-control",
+             ("left-channel", "AnyAudioClass://audio", "gearup")),
+            ("add-control",
+             ("right-channel", "AnyAudioClass://audio", "geardown")),
+            ("add-control",
+             ("both-channel", "AnyAudioClass://audio", "gearmulti",
+              "AudioFileSelection://ph-sound"))
+            ))
 
 # etc, each node can have modules in its mymods list
 

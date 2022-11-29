@@ -51,13 +51,13 @@ bool PortAudioMultiObject::initSound(PortAudioListener* _master)
 {
   // remember the PA master
   master = _master;
-  
+
   // basic initialization first
   if (this->PortAudioObject::initSound(master)) {
 
     base_volumes.resize(master->getNumChannels(), 0.0f);
     for (unsigned ii = min(master->getNumChannels(),
-			   unsigned(spec.coordinates.size())); ii--; ) {
+                           unsigned(spec.coordinates.size())); ii--; ) {
       base_volumes[ii] = spec.coordinates[ii];
     }
     return true;
@@ -79,31 +79,31 @@ void PortAudioMultiObject::connect(const GlobalId& master_id,
     r_newfile.reset
       (new ChannelReadToken
        (master_id, NameSet(spec.filename[1]),
-	getclassname<AudioFileSelection>(), r_audio->getEntryLabel(),
-	Channel::Events, Channel::OnlyOneEntry, Channel::ReadAllData));
+        getclassname<AudioFileSelection>(), r_audio->getEntryLabel(),
+        Channel::Events, Channel::OnlyOneEntry, Channel::ReadAllData));
   }
 }
 
 void PortAudioMultiObject::iterate(const TimeSpec& ts,
-				   const BaseObjectMotion& base)
+                                   const BaseObjectMotion& base)
 {
   if (r_newfile && r_newfile->isValid() && r_newfile->haveVisibleSets(ts)) {
     try {
       DataReader<AudioFileSelection> nf(*r_newfile, ts);
       try {
-	assert(master != NULL);
-	buffer = master->getBufferManager().getBuffer(nf.data().filename);
-	ridx = 0U;
+        assert(master != NULL);
+        buffer = master->getBufferManager().getBuffer(nf.data().filename);
+        ridx = 0U;
       }
       catch (const SoundFileReadError& e) {
-	W_MOD("cannot load '" << nf.data().filename << "' " << e.what());
+        W_MOD("cannot load '" << nf.data().filename << "' " << e.what());
       }
     }
     catch (const NoDataAvailable& e) {
       W_MOD("Error reading '" << r_newfile->getName() << "' " << e.what());
     }
   }
-  
+
   if (r_audio->isValid()) {
     if (r_audio->getNumVisibleSets(ts.getValidityStart()) ) {
       try {
@@ -111,11 +111,11 @@ void PortAudioMultiObject::iterate(const TimeSpec& ts,
         DataReader<AudioObjectFixed,MatchIntervalStartOrEarlier>
           r(*r_audio, ts);
 
-	// event based, replay this sound from start
+        // event based, replay this sound from start
         if (!looping) { ridx = 0; }
 
-	// continuous play of data, simply adjust sound parameters
-	volume = r.data().volume;
+        // continuous play of data, simply adjust sound parameters
+        volume = r.data().volume;
       }
       catch (const NoDataAvailable& e) {
         I_MOD("no audio data for " << spec.name);

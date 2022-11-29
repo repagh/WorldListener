@@ -19,12 +19,6 @@
 #include "OpenALObjectMoving.hxx"
 #include <limits>
 
-// include the debug writing header. Warning and error messages
-// are on by default, debug and info can be selected by
-// uncommenting the respective defines
-//#define D_MOD
-//#define I_MOD
-#include <debug.h>
 
 // include additional files needed for your calculation here
 
@@ -33,6 +27,14 @@
 #include <MemberCall.hxx>
 #include <MemberCall2Way.hxx>
 #include <CoreCreator.hxx>
+
+// include the debug writing header. Warning and error messages
+// are on by default, debug and info can be selected by
+// uncommenting the respective defines
+//#define D_MOD
+//#define I_MOD
+#include <debug.h>
+
 USING_DUECA_NS;
 
 OPEN_NS_WORLDLISTENER;

@@ -1,0 +1,24 @@
+;; -*-scheme-*-
+
+(Header "
+        item            : AudioFileSelection.dco
+        made by         : Rene' van Paassen
+        date            : 221111
+        description     : Volume and pitch of an audio object
+        copyright       : (c) 2022 Rene van Paassen")
+
+(Type std::string "#include <string>")
+
+;; This provides basic audio properties of a sound fixed in the world
+;; for example sounds of a static object.
+;;
+;; sounds in event channels are played as events come in, and played once,
+;; sounds in stream channels are played continuously looping
+(Stream AudioFileSelection
+
+        (Option hdf5)
+        (Option msgpack)
+
+        ;; file to select
+        (std::string filename)
+       )
