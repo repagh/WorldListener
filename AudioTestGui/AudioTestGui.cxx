@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------   */
-/*      item            : PortAudioTest.cxx
+/*      item            : AudioTestGui.cxx
         made by         : repa
         from template   : DuecaModuleTemplate.cxx (2022.06)
         date            : Mon Nov 28 14:26:11 2022
@@ -11,10 +11,10 @@
 */
 
 
-#define PortAudioTest_cxx
+#define AudioTestGui_cxx
 
 // include the definition of the module class
-#include "PortAudioTest.hxx"
+#include "AudioTestGui.hxx"
 
 // include additional files needed for your calculation here
 
@@ -29,10 +29,10 @@
 #include <debug.h>
 
 // class/module name
-const char* const PortAudioTest::classname = "port-audio-test";
+const char* const AudioTestGui::classname = "audio-test-gui";
 
 // Parameters to be inserted
-const ParameterTable* PortAudioTest::getMyParameterTable()
+const ParameterTable* AudioTestGui::getMyParameterTable()
 {
   static const ParameterTable parameter_table[] = {
     { "set-timing",
@@ -52,7 +52,6 @@ const ParameterTable* PortAudioTest::getMyParameterTable()
       "- Name of the AudioObjectFixed channel\n"
       "- Label for the AudioObjectFixed channel\n"
       "- Name for the AudioFileSelection channel (optional)\n"
-      "- Label for the AudioFileSelection channel (needed if previous)\n"
     },
     /* You can extend this table with labels and MemberCall or
        VarProbe pointers to perform calls or insert values into your
@@ -74,7 +73,7 @@ const ParameterTable* PortAudioTest::getMyParameterTable()
 }
 
 // constructor
-PortAudioTest::PortAudioTest(Entity* e, const char* part, const
+AudioTestGui::AudioTestGui(Entity* e, const char* part, const
                    PrioritySpec& ps) :
   /* The following line initialises the SimulationModule base class.
      You always pass the pointer to the entity, give the classname and the
@@ -104,7 +103,7 @@ PortAudioTest::PortAudioTest(Entity* e, const char* part, const
   // or enter the clock here */);
 }
 
-bool PortAudioTest::complete()
+bool AudioTestGui::complete()
 {
   bool res = true;
 
@@ -118,13 +117,13 @@ bool PortAudioTest::complete()
 }
 
 // destructor
-PortAudioTest::~PortAudioTest()
+AudioTestGui::~AudioTestGui()
 {
   //
 }
 
 // as an example, the setTimeSpec function
-bool PortAudioTest::setTimeSpec(const TimeSpec& ts)
+bool AudioTestGui::setTimeSpec(const TimeSpec& ts)
 {
   // a time span of 0 is not acceptable
   if (ts.getValiditySpan() == 0) return false;
@@ -143,7 +142,7 @@ bool PortAudioTest::setTimeSpec(const TimeSpec& ts)
 
 // the checkTiming function installs a check on the activity/activities
 // of the module
-bool PortAudioTest::checkTiming(const std::vector<int>& i)
+bool AudioTestGui::checkTiming(const std::vector<int>& i)
 {
   if (i.size() == 3) {
     new TimingCheck(do_calc, i[0], i[1], i[2]);
@@ -157,10 +156,10 @@ bool PortAudioTest::checkTiming(const std::vector<int>& i)
   return true;
 }
 
-bool PortAudioTest::addControl(const std::vector<std::string>& args)
+bool AudioTestGui::addControl(const std::vector<std::string>& args)
 {
-  if (args.size() != 3 && args.size() != 5) {
-    W_MOD("PortAudioTest::addControl needs three or five string arguments");
+  if (args.size() != 3 && args.size() != 4) {
+    W_MOD("AudioTestGui::addControl needs three or four string arguments");
     return false;
   }
   try {
@@ -168,19 +167,19 @@ bool PortAudioTest::addControl(const std::vector<std::string>& args)
       testunits.emplace_back(this, args[0], args[1], args[2]);
     }
     else {
-      testunits.emplace_back(this, args[0], args[1], args[2], args[3], args[4]);
+      testunits.emplace_back(this, args[0], args[1], args[2], args[3]);
     }
     return true;
   }
   catch (const std::exception &e) {
-    W_MOD("PortAudioTest::addControl, error in creating test unit: " <<
+    W_MOD("AudioTestGui::addControl, error in creating test unit: " <<
           e.what());
   }
   return false;
 }
 
 // tell DUECA you are prepared
-bool PortAudioTest::isPrepared()
+bool AudioTestGui::isPrepared()
 {
   bool res = true;
 
@@ -194,13 +193,13 @@ bool PortAudioTest::isPrepared()
 }
 
 // start the module
-void PortAudioTest::startModule(const TimeSpec &time)
+void AudioTestGui::startModule(const TimeSpec &time)
 {
   do_calc.switchOn(time);
 }
 
 // stop the module
-void PortAudioTest::stopModule(const TimeSpec &time)
+void AudioTestGui::stopModule(const TimeSpec &time)
 {
   do_calc.switchOff(time);
 }
@@ -208,7 +207,7 @@ void PortAudioTest::stopModule(const TimeSpec &time)
 // this routine contains the main simulation process of your module. You
 // should read the input channels here, and calculate and write the
 // appropriate output
-void PortAudioTest::doCalculation(const TimeSpec& ts)
+void AudioTestGui::doCalculation(const TimeSpec& ts)
 {
   // access the input
   // example:
@@ -242,36 +241,35 @@ void PortAudioTest::doCalculation(const TimeSpec& ts)
 // Make a TypeCreator object for this module, the TypeCreator
 // will check in with the script code, and enable the
 // creation of modules of this type
-static TypeCreator<PortAudioTest> a(PortAudioTest::getMyParameterTable());
+static TypeCreator<AudioTestGui> a(AudioTestGui::getMyParameterTable());
 
-PortAudioTest::PATestUnit::PATestUnit(const PortAudioTest *master,
+AudioTestGui::PATestUnit::PATestUnit(const AudioTestGui *master,
                                       const std::string& name,
                                       const std::string& channel,
                                       const std::string& label,
-                                      const std::string& channel2,
-                                      const std::string& label2) :
-  AssociateObject<PortAudioTest>(*master),
+                                      const std::string& file_channel) :
+  AssociateObject<AudioTestGui>(*master),
   name(name),
-  uifile("../../../PortAudioTest/testgui-full.ui"),
+  uifile("../../../AudioTestGui/testgui-full.ui"),
   window(),
   volume(0.0),
   pitch(1.0),
   w_test(getId(), NameSet(channel), getclassname<AudioObjectFixed>(),
          label, Channel::Events, Channel::OneOrMoreEntries),
   w_newfile(new ChannelWriteToken
-            (getId(), NameSet(channel2), getclassname<AudioFileSelection>(),
-             label2, Channel::Events, Channel::OneOrMoreEntries))
+            (getId(), NameSet(file_channel), getclassname<AudioFileSelection>(),
+             label, Channel::Events, Channel::OneOrMoreEntries))
 {
   //
 }
 
-PortAudioTest::PATestUnit::PATestUnit(const PortAudioTest *master,
+AudioTestGui::PATestUnit::PATestUnit(const AudioTestGui *master,
                                       const std::string& name,
                                       const std::string& channel,
                                       const std::string& label) :
-  AssociateObject<PortAudioTest>(*master),
+  AssociateObject<AudioTestGui>(*master),
   name(name),
-  uifile("../../../PortAudioTest/testgui-small.ui"),
+  uifile("../../../AudioTestGui/testgui-small.ui"),
   window(),
   volume(0.0),
   pitch(1.0),
@@ -282,17 +280,17 @@ PortAudioTest::PATestUnit::PATestUnit(const PortAudioTest *master,
   //
 }
 
-bool PortAudioTest::PATestUnit::complete()
+bool AudioTestGui::PATestUnit::complete()
 {
   static GladeCallbackTable cb_table[] = {
-    { "ft_volume", "change-value",
-      gtk_callback(&PortAudioTest::PATestUnit::changeVolume) },
-    
-    { "ft_pitch", "change-value",
-      gtk_callback(&PortAudioTest::PATestUnit::changeVolume) },
-    
-    { "ft_filechoice", "file-activated",
-      gtk_callback(&PortAudioTest::PATestUnit::selectFile) },
+    { "ft_volume", "value-changed",
+      gtk_callback(&AudioTestGui::PATestUnit::changeVolume) },
+
+    { "ft_pitch", "value-changed",
+      gtk_callback(&AudioTestGui::PATestUnit::changePitch) },
+
+    { "ft_filechoice", "selection-changed",
+      gtk_callback(&AudioTestGui::PATestUnit::selectFile) },
     { NULL, NULL, NULL }
   };
 
@@ -300,29 +298,30 @@ bool PortAudioTest::PATestUnit::complete()
     (uifile.c_str(), "ft_window", reinterpret_cast<gpointer>(this),
      cb_table);
   gtk_window_set_title(GTK_WINDOW(window["ft_window"]), name.c_str());
+  if (window.getObject("file_dialog")) {
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(window["file_dialog"]), ".");
+  }
   window.show();
   return true;
 }
 
-void PortAudioTest::PATestUnit::changeVolume(GtkRange* w, GtkScrollType* scroll,
-					     gdouble value, gpointer p)
+void AudioTestGui::PATestUnit::changeVolume(GtkRange* w, gpointer p)
 {
-  volume = value;
+  volume = gtk_range_get_value(w);
   DataWriter<AudioObjectFixed> v(w_test);
   v.data().volume = volume;
   v.data().pitch = pitch;
 }
 
-void PortAudioTest::PATestUnit::changePitch(GtkRange* w, GtkScrollType* scroll,
-					    gdouble value, gpointer p)
+void AudioTestGui::PATestUnit::changePitch(GtkRange* w, gpointer p)
 {
-  pitch = value;
+  pitch = gtk_range_get_value(w);
   DataWriter<AudioObjectFixed> v(w_test);
   v.data().volume = volume;
   v.data().pitch = pitch;
 }
 
-void PortAudioTest::PATestUnit::selectFile(GtkFileChooser* w, gpointer p)
+void AudioTestGui::PATestUnit::selectFile(GtkFileChooser* w, gpointer p)
 {
   gchar *fname = gtk_file_chooser_get_filename(w);
   if (fname) {

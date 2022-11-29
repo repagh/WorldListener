@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------   */
-/*      item            : PortAudioTest.hxx
+/*      item            : AudioTestGui.hxx
         made by         : repa
         from template   : DuecaModuleTemplate.hxx (2022.06)
         date            : Mon Nov 28 14:26:11 2022
@@ -10,8 +10,8 @@
         copyright       : (c)
 */
 
-#ifndef PortAudioTest_hxx
-#define PortAudioTest_hxx
+#ifndef AudioTestGui_hxx
+#define AudioTestGui_hxx
 
 // include the dusime header
 #include <dueca.h>
@@ -26,7 +26,7 @@ USING_DUECA_NS;
 #if GTK_MAJOR_VERSION == 3
 #include <GtkGladeWindow.hxx>
 #else
-#error "PortAudioTest not defined for this GTK version"
+#error "AudioTestGui not defined for this GTK version"
 #endif
 #include <dueca/AssociateObject.hxx>
 
@@ -37,14 +37,14 @@ USING_DUECA_NS;
 
     \verbinclude port-audio-test.scm
  */
-class PortAudioTest: public Module
+class AudioTestGui: public Module
 {
   /** self-define the module type, to ease writing the parameter table */
-  typedef PortAudioTest _ThisModule_;
+  typedef AudioTestGui _ThisModule_;
 
 private: // simulation data
   // declare the data you need in your simulation
-  struct PATestUnit: public AssociateObject<PortAudioTest>
+  struct PATestUnit: public AssociateObject<AudioTestGui>
   {
     /** Name, identification */
     std::string          name;
@@ -60,7 +60,7 @@ private: // simulation data
 
     /** Pitch */
     float                pitch;
-    
+
     /** Token to write */
     ChannelWriteToken    w_test;
 
@@ -68,29 +68,26 @@ private: // simulation data
     boost::scoped_ptr<ChannelWriteToken> w_newfile;
 
     /** Callback function */
-    void changeVolume(GtkRange* w, GtkScrollType* scroll,
-		      gdouble value, gpointer p);
+    void changeVolume(GtkRange* w, gpointer p);
 
     /** Callback function */
-    void changePitch(GtkRange* w, GtkScrollType* scroll,
-		     gdouble value, gpointer p);
+    void changePitch(GtkRange* w, gpointer p);
 
     /** New file selection */
     void selectFile(GtkFileChooser* w, gpointer p);
 
     /** Constructor with file chooser option */
-    PATestUnit(const PortAudioTest *master,
-	       const std::string& name,
-	       const std::string& channel,
-	       const std::string& label,
-	       const std::string& channel2,
-	       const std::string& label2);
+    PATestUnit(const AudioTestGui *master,
+               const std::string& name,
+               const std::string& channel,
+               const std::string& label,
+               const std::string& file_channel);
 
     /** Constructor with only volume/pitch control. */
-    PATestUnit(const PortAudioTest *master,
-	       const std::string& name,
-	       const std::string& channel,
-	       const std::string& label);
+    PATestUnit(const AudioTestGui *master,
+               const std::string& name,
+               const std::string& channel,
+               const std::string& label);
 
     /** Read and open the window */
     bool complete();
@@ -98,7 +95,7 @@ private: // simulation data
 
   /** List of test units/windows */
   std::list<PATestUnit> testunits;
-  
+
 private: // channel access
 
 private: // activity allocation
@@ -107,7 +104,7 @@ private: // activity allocation
   //PeriodicAlarm        myclock;
 
   /** Callback object for simulation calculation. */
-  Callback<PortAudioTest>  cb1;
+  Callback<AudioTestGui>  cb1;
 
   /** Activity for simulation calculation. */
   ActivityCallback      do_calc;
@@ -121,7 +118,7 @@ public: // class name and trim/parameter tables
 
 public: // construction and further specification
   /** Constructor. Is normally called from scheme/the creation script. */
-  PortAudioTest(Entity* e, const char* part, const PrioritySpec& ts);
+  AudioTestGui(Entity* e, const char* part, const PrioritySpec& ts);
 
   /** Continued construction. This is called after all script
       parameters have been read and filled in, according to the
@@ -133,7 +130,7 @@ public: // construction and further specification
   bool complete();
 
   /** Destructor. */
-  ~PortAudioTest();
+  ~AudioTestGui();
 
   // add here the member functions you want to be called with further
   // parameters. These are then also added in the parameter table
@@ -148,7 +145,7 @@ public: // construction and further specification
 
   /** Add a control window for a */
   bool addControl(const std::vector<std::string>& args);
-  
+
 public: // member functions for cooperation with DUECA
   /** indicate that everything is ready. */
   bool isPrepared();

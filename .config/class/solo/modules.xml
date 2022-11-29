@@ -23,7 +23,7 @@
     <module pseudo="true">PA34_sounds</module>
     <module>SoundRecorder</module>
     <module>PortAudioListener</module>
-    <module>PortAudioTest</module>
+    <module>AudioTestGui</module>
   </project>
   <project>
     <url>dgrpub:///WorldView.git</url>
