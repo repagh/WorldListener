@@ -291,7 +291,8 @@ bool OpenALListener_DUECA::addObjectClassData
 
 bool OpenALListener_DUECA::setLooping(const bool& l)
 {
-  spec.type += " looping";
+  if(l)
+    spec.type += " looping";
   return true;
 }
 
