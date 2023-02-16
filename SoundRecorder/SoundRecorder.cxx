@@ -80,6 +80,11 @@ const ParameterTable* SoundRecorder::getMyParameterTable()
       new VarProbe<_ThisModule_,bool>
       (&_ThisModule_::record_hold),
       "Also record when in hold mode" },
+
+    { "single-file",
+      new VarProbe<_ThisModule_,bool>
+      (&_ThisModule_::single_file),
+      "Use a single recording file for whole session, or one for each run" },
     
     /* You can extend this table with labels and MemberCall or
        VarProbe pointers to perform calls or insert values into your
@@ -125,6 +130,8 @@ SoundRecorder::SoundRecorder(Entity* e, const char* part, const
   written_sample_count(0U),
   bytes_per_point(0),
   recording(false),
+  single_file(true),
+  prev_SimulationState(SimulationState::Undefined),
 
   // initialize the channel access tokens
   w_progress(getId(), NameSet(getEntity(), RecordingProgress::classname, part),
@@ -270,23 +277,25 @@ bool SoundRecorder::complete()
 
   bytes_per_point = have.channels * table_bytes_Format(sample_format);
   
-  SF_INFO sfinfo; memset(&sfinfo, 0, sizeof(sfinfo));
+  memset(&sfinfo, 0, sizeof(sfinfo));
   sfinfo.samplerate = have.freq;
   sfinfo.channels = have.channels;
   sfinfo.format = SF_FORMAT_OGG | SF_FORMAT_VORBIS;
-  std::string fname = formatTime
-    (boost::posix_time::second_clock::universal_time(), filename);
-  sndfile = sf_open(fname.c_str(), SFM_WRITE, &sfinfo);
 
- 
-  if (sndfile == NULL) {
-    E_MOD("Cannot open capture file " << fname);
-    return false;
-  }
-  else {
-    I_MOD("Storing recording in file " << fname);
-  }
+  if(single_file) {
+    std::string fname = formatTime
+      (boost::posix_time::second_clock::universal_time(), filename);
+    sndfile = sf_open(fname.c_str(), SFM_WRITE, &sfinfo);
     
+    if (sndfile == NULL) {
+      E_MOD("Cannot open capture file " << fname);
+      return false;
+    }
+    else {
+      I_MOD("Storing recording in single file " << fname);
+    }
+  }
+  
   return true;
 }
 
@@ -294,6 +303,7 @@ bool SoundRecorder::complete()
 SoundRecorder::~SoundRecorder()
 {
   //
+  sf_close(sndfile);
 }
 
 // as an example, the setTimeSpec function
@@ -350,21 +360,46 @@ void SoundRecorder::stopModule(const TimeSpec &time)
 void SoundRecorder::doCalculation(const TimeSpec& ts)
 {
   // check the state we are supposed to be in
-  switch (getAndCheckState(ts)) {
+  SimulationState::Type cur_SimulationState = getAndCheckState(ts);
+  switch (cur_SimulationState) {
   case SimulationState::HoldCurrent: {
 
-    if (recording) {
+    // switch off at last cycle before stop
+    if(do_calc.lastCycle(ts)) {
+      SDL_PauseAudioDevice(capture_dev, SDL_TRUE);
+      sf_close(sndfile);
+      recording = false;
+    }
 
-      // switch off for "advance-only" recording, or last cycle before stop
-      if (!record_hold || do_calc.lastCycle(ts)) {
+    // switch when changing state
+    if(prev_SimulationState != SimulationState::HoldCurrent) {
+
+      // switch off for "advance-only" recording
+      if (!record_hold) {
 	SDL_PauseAudioDevice(capture_dev, SDL_TRUE);
+	if(!single_file) {
+	  sf_close(sndfile);
+	}
 	recording = false;
       }
-    }
-    else {
-
       // only switch on for recording in hold
-      if (record_hold) {
+      else {
+	if(!single_file) {
+	  // open new file
+	  std::string fname = formatTime
+	    (boost::posix_time::second_clock::universal_time(), filename);
+	  sndfile = sf_open(fname.c_str(), SFM_WRITE, &sfinfo);
+	  
+	  if (sndfile == NULL) {
+	    E_MOD("Cannot open new capture file " << fname);
+	    recording = false;
+	    break;
+	  }
+	  else {
+	    I_MOD("Storing recording in new HC file " << fname);
+	  }
+	}
+	
 	SDL_PauseAudioDevice(capture_dev, SDL_FALSE);
 	recording = true;
       }
@@ -374,7 +409,25 @@ void SoundRecorder::doCalculation(const TimeSpec& ts)
     
   case SimulationState::Replay:
   case SimulationState::Advance: {
-    if (!recording) {
+    // switch when changing state
+    if(prev_SimulationState != SimulationState::Advance &&
+       prev_SimulationState != SimulationState::Replay) {
+      if(!single_file) {
+	// open new file
+	std::string fname = formatTime
+	  (boost::posix_time::second_clock::universal_time(), filename);
+	sndfile = sf_open(fname.c_str(), SFM_WRITE, &sfinfo);
+	
+	if (sndfile == NULL) {
+	  E_MOD("Cannot open new capture file " << fname);
+	  recording = false;
+	  break;
+	}
+	else {
+	  I_MOD("Storing recording in new Adv/Replay file " << fname);
+	}
+      }
+      
       SDL_PauseAudioDevice(capture_dev, SDL_FALSE);
       recording = true;
     }
@@ -386,6 +439,9 @@ void SoundRecorder::doCalculation(const TimeSpec& ts)
     // exception if we get here,
     throw CannotHandleState(getId(),GlobalId(), "state unhandled");
   }
+
+  // remember for next time
+  prev_SimulationState = cur_SimulationState;
 
   // write information on the number of samples if recording
   if (recording && written_sample_count < sample_count) {

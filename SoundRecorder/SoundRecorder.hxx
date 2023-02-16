@@ -78,6 +78,15 @@ private: // simulation data
 
   /** Recording status */
   bool recording;
+
+  /** Specification of recording file */
+  SF_INFO sfinfo;
+
+  /** Use a single file for recording (or open a new one in Advance) */
+  bool single_file;
+
+  /** Previous SimState for detecting state changes */
+  SimulationState prev_SimulationState;
   
 private: // channel access
   /** Information on recording progress */
