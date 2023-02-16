@@ -73,8 +73,11 @@ private: // simulation data
   /** Count of samples */
   unsigned written_sample_count;
 
-  /** Bytes to sample factor */
+  /** Bytes per recording (n-channel) point */
   unsigned bytes_per_point;
+
+  /** Bytes per single channel sample */
+  unsigned bytes_per_sample;
 
   /** Recording status */
   bool recording;

@@ -23,6 +23,7 @@
 #include "comm-objects.h"
 #include "ListenerBase.hxx"
 #include <boost/scoped_ptr.hpp>
+#include <memory>
 
 // include headers for functions/classes you need in the module
 #if defined(DUECA_CONFIG_HDF5)
@@ -164,7 +165,7 @@ private: // channel access
   boost::scoped_ptr<ChannelReadToken>  r_own;
 
   /** Channel watcher for the other entities */
-  typedef std::list<boost::shared_ptr<ChannelWatcher> > watcher_list_t;
+  typedef std::list<std::shared_ptr<ChannelWatcher> > watcher_list_t;
 
   /** Channel watchers for the other entities */
   watcher_list_t                       m_others;

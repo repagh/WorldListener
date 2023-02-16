@@ -1,35 +1,20 @@
+# -*-sh-*-
 # this file creates all links to files in the data directory needed for
 # running the application is a specific machine. 
-#
-# example
-# ln -sf $DATADIR/*.cnf .
+
+# standard folder with project-wide data
 DATADIR=../../run-data
-SNDDIR=../../../../WorldListener/PA34_sounds
 
-ln -sf ../../../../WorldListener/WorldListener/startpulse.script
+# create a folder for run log history
+if [ ! -d runlogs ]; then
+   mkdir runlogs
+fi
 
-# brute-force everything max 44100, mono 
-for f in $DATADIR/*.wav $SNDDIR/*.wav; do
-    NEWRATE=
-    NEWCHAN=
-    NEWGAIN=
-    NEWBITS=
-    # soxi $f
-    if [ `soxi -r $f` -gt 44100 ]; then
-       NEWRATE="-r 44100"
-    fi
-    if [ `soxi -c $f` -gt 1 ]; then
-       NEWCHAN="-c 1"
-       NEWGAIN="gain -3"
-    fi
-    if [ `soxi -b $f` -gt 16 ]; then
-       NEWBITS="-b 16"
-    fi
-    if [ -n "$NEWCHAN$NEWRATE$NEWBITS" ]; then
-        sox $f $NEWCHAN $NEWRATE $NEWBITS `basename $f` $NEWGAIN
-    else   
-        ln -sf $f `basename $f`
-    fi
-done
+# convenience link to executable (cmake or legacy)
+if [ -d ../../../build ]; then
+   ln -sf ../../../build/dueca_run.x .
+else
+   ln -sf ../../../dueca_run.x .
+fi
 
 ln -sf ../../../WorldListener/plotaudio.py .

@@ -168,7 +168,7 @@ bool WorldListener::complete()
 
   if (no_explicit_entity_watch) {
     m_others.push_back
-      (boost::shared_ptr<ChannelWatcher>
+      (std::shared_ptr<ChannelWatcher>
        (new ChannelWatcher(NameSet( "audio", "AnyAudioClass", ""), true)));
   }
 
@@ -267,7 +267,7 @@ bool WorldListener::addWorldInformationChannel
   no_explicit_entity_watch = false;
   for (auto &chn: ch) {
     m_others.push_back
-      (boost::shared_ptr<ChannelWatcher>
+      (std::shared_ptr<ChannelWatcher>
        (new ChannelWatcher(NameSet(chn), true)));
   }
   return true;

@@ -75,7 +75,7 @@ const ParameterTable* SoundRecorder::getMyParameterTable()
       new VarProbe<_ThisModule_,std::string>
       (&_ThisModule_::filename),
       "Name/pattern for the resulting file, e.g. recording-%Y%m%d_%H%M%S.ogg" },
-    
+
     { "record-in-hold",
       new VarProbe<_ThisModule_,bool>
       (&_ThisModule_::record_hold),
@@ -85,7 +85,7 @@ const ParameterTable* SoundRecorder::getMyParameterTable()
       new VarProbe<_ThisModule_,bool>
       (&_ThisModule_::single_file),
       "Use a single recording file for whole session, or one for each run" },
-    
+
     /* You can extend this table with labels and MemberCall or
        VarProbe pointers to perform calls or insert values into your
        class objects. Please also add a description (c-style string).
@@ -129,6 +129,7 @@ SoundRecorder::SoundRecorder(Entity* e, const char* part, const
   sample_count(0U),
   written_sample_count(0U),
   bytes_per_point(0),
+  bytes_per_sample(1U),
   recording(false),
   single_file(true),
   prev_SimulationState(SimulationState::Undefined),
@@ -159,13 +160,12 @@ namespace {
 
   // conversion table
   static format_table_struct format_table[] = {
-    { "S8", AUDIO_S8, SF_FORMAT_PCM_S8, 1 },
     { "S16", AUDIO_S16, SF_FORMAT_PCM_16, 2 },
     { "S32", AUDIO_S32, SF_FORMAT_PCM_32, 4 },
     { NULL, 0, 0, 0 }
   };
 
-  // error exception 
+  // error exception
   struct audio_format_missing: public std::exception
   {
     const char* what() const throw()
@@ -205,6 +205,17 @@ namespace {
     throw(audio_format_missing());
   }
 
+  // get the string from an SDL format
+  const char* table_SDL_to_format(SDL_AudioFormat fmt)
+  {
+    for (auto &tf: format_table) {
+      if (fmt == tf.sdl_format) {
+	return tf.name;
+      }
+    }
+    throw(audio_format_missing());
+  }
+
   // adapt a filename
   std::string formatTime(const boost::posix_time::ptime& now,
                          const std::string& lft)
@@ -228,9 +239,20 @@ static void audiocallback(void* mod, Uint8* data, int len)
 
 void SoundRecorder::cbAudio(Uint8* data, int len)
 {
-  sf_count_t count = sf_write_short
-    (sndfile, reinterpret_cast<short int*>(data), len/bytes_per_point);
-  sample_count += len/bytes_per_point;
+  switch(bytes_per_sample) {
+  case 2: {
+    sf_count_t count = sf_write_short
+      (sndfile, reinterpret_cast<short int*>(data), len/bytes_per_sample);
+    sample_count += len/bytes_per_point;
+  }
+    break;
+  case 4: {
+    sf_count_t count = sf_write_int
+      (sndfile, reinterpret_cast<int*>(data), len/bytes_per_sample);
+    sample_count += len/bytes_per_point;
+  }
+    break;
+  }
 }
 
 
@@ -273,20 +295,21 @@ bool SoundRecorder::complete()
     E_MOD("Error opening capture device " << SDL_GetError());
     return false;
   }
-  DEB("recording " << have.channels << " at " << have.freq);
+  DEB("recording " << int(have.channels) << " channels at " << have.freq <<
+      " format " << table_SDL_to_format(have.format));
 
-  bytes_per_point = have.channels * table_bytes_Format(sample_format);
-  
+  bytes_per_sample = table_bytes_Format(table_SDL_to_format(have.format));
+  bytes_per_point = int(have.channels) * bytes_per_sample;
   memset(&sfinfo, 0, sizeof(sfinfo));
   sfinfo.samplerate = have.freq;
-  sfinfo.channels = have.channels;
+  sfinfo.channels = int(have.channels);
   sfinfo.format = SF_FORMAT_OGG | SF_FORMAT_VORBIS;
 
   if(single_file) {
     std::string fname = formatTime
       (boost::posix_time::second_clock::universal_time(), filename);
     sndfile = sf_open(fname.c_str(), SFM_WRITE, &sfinfo);
-    
+
     if (sndfile == NULL) {
       E_MOD("Cannot open capture file " << fname);
       return false;
@@ -295,7 +318,7 @@ bool SoundRecorder::complete()
       I_MOD("Storing recording in single file " << fname);
     }
   }
-  
+
   return true;
 }
 
@@ -336,9 +359,9 @@ bool SoundRecorder::isPrepared()
 {
   bool res = true;
 
-  // channel for writing progress of recording 
+  // channel for writing progress of recording
   CHECK_TOKEN(w_progress);
-  
+
   // return result of checks
   return res;
 }
@@ -389,7 +412,7 @@ void SoundRecorder::doCalculation(const TimeSpec& ts)
 	  std::string fname = formatTime
 	    (boost::posix_time::second_clock::universal_time(), filename);
 	  sndfile = sf_open(fname.c_str(), SFM_WRITE, &sfinfo);
-	  
+
 	  if (sndfile == NULL) {
 	    E_MOD("Cannot open new capture file " << fname);
 	    recording = false;
@@ -399,14 +422,14 @@ void SoundRecorder::doCalculation(const TimeSpec& ts)
 	    I_MOD("Storing recording in new HC file " << fname);
 	  }
 	}
-	
+
 	SDL_PauseAudioDevice(capture_dev, SDL_FALSE);
 	recording = true;
       }
     }
     break;
     }
-    
+
   case SimulationState::Replay:
   case SimulationState::Advance: {
     // switch when changing state
@@ -417,7 +440,7 @@ void SoundRecorder::doCalculation(const TimeSpec& ts)
 	std::string fname = formatTime
 	  (boost::posix_time::second_clock::universal_time(), filename);
 	sndfile = sf_open(fname.c_str(), SFM_WRITE, &sfinfo);
-	
+
 	if (sndfile == NULL) {
 	  E_MOD("Cannot open new capture file " << fname);
 	  recording = false;
@@ -427,7 +450,7 @@ void SoundRecorder::doCalculation(const TimeSpec& ts)
 	  I_MOD("Storing recording in new Adv/Replay file " << fname);
 	}
       }
-      
+
       SDL_PauseAudioDevice(capture_dev, SDL_FALSE);
       recording = true;
     }

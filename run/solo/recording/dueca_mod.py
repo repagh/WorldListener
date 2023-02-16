@@ -69,7 +69,8 @@ if this_node_id == ecs_node:
         "sound-recorder", "", admin_priority).param(
             ('set_timing', display_timing),
             ('check_timing', (10000, 20000)),
-            ('sample-channels', 1)))
+            ('capture-device', "Logitech Stereo H650e Analog Stereo"),
+            ('sample-channels', 2)))
 
 
 # etc, each node can have modules in its mymods list
