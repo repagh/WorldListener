@@ -24,7 +24,8 @@ PortAudioMultiObject::PortAudioMultiObject(const WorldDataSpec& spec) :
   PortAudioObjectFixed(spec),
   master(NULL),
   base_volumes(),
-  r_newfile()
+  r_newfile(),
+  next_buffer(nullptr)
 {
   //
 }
@@ -37,6 +38,10 @@ PortAudioMultiObject::~PortAudioMultiObject()
 
 void PortAudioMultiObject::addData(float* out, unsigned dataCount)
 {
+  if (next_buffer) {
+    buffer = next_buffer; ridx = 0;
+    next_buffer = nullptr;
+  }
   unsigned ii = 0;
   while (ii < dataCount && ridx < buffer->info.frames) {
     for (const auto vol: base_volumes) {
@@ -92,8 +97,8 @@ void PortAudioMultiObject::iterate(const TimeSpec& ts,
       DataReader<AudioFileSelection> nf(*r_newfile, ts);
       try {
         assert(master != NULL);
-        buffer = master->getBufferManager().getBuffer(nf.data().filename);
-        ridx = 0U;
+        next_buffer = master->getBufferManager().getBuffer(nf.data().filename);
+        //ridx = 0U;
       }
       catch (const SoundFileReadError& e) {
         W_MOD("cannot load '" << nf.data().filename << "' " << e.what());
