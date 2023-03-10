@@ -121,6 +121,9 @@ private:
 
   /** Specify gain */
   bool setGain(const double& g);
+
+  /** Pre-load sound buffers */
+  bool preloadSounds(const std::vector<std::string>& sounds);
 };
 
 CLOSE_NS_WORLDLISTENER;
