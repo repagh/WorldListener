@@ -4,12 +4,15 @@
 # example
 # ln -sf $DATADIR/*.cnf .
 DATADIR=../../run-data
-SNDDIR=../../../../WorldListener/PA34_sounds
+SNDDIR=${HOME}/gdapps/WorldListener.tud/WorldListener/PA34_sounds
 
 ln -sf ../../../../WorldListener/WorldListener/startpulse.script
+test -d runlogs && mkdir runlogs
+ln -sf ../../../build/dueca_run.x .
+
 
 # brute-force everything max 44100, mono 
-for f in $DATADIR/*.wav $SNDDIR/*.wav; do
+for f in $SNDDIR/*.wav; do
     NEWRATE=
     NEWCHAN=
     NEWGAIN=

@@ -44,6 +44,32 @@ display_timing = dueca.TimeSpec(0, 200)
 ## log a bit more economical, 25 Hz
 log_timing = dueca.TimeSpec(0, 400)
 
+## try to find the openal devices, requires python-openal (pyal)
+
+try:
+    from openal import alc
+    res = alc.alcGetString(None, alc.ALC_ALL_DEVICES_SPECIFIER)
+
+    # initialize
+    dev = b''
+    aldevices = []
+    i = 0
+
+    # run until stopped by 2 nulls
+    while not (ord(res[i]) == 0 and not(dev)):
+        if ord(res[i]) == 0:
+            aldevices.append(dev.decode('ascii'))
+            dev = b''
+        else:
+            dev += res[i]
+        i += 1
+    print(aldevices)
+        
+except ImportError:
+    aldevices = [ 'Built-in Audio Analog Stereo' ]
+
+
+
 ## ---------------------------------------------------------------------
 ### the modules needed for dueca itself
 if this_node_id == ecs_node:
@@ -108,7 +134,7 @@ if this_node_id == ecs_node:
             ('control-logger', "HDFLogConfig://ph-sound"),
             ('set-listener',
              dueca.OpenALListener().param(
-                 ('set-devicename', "Xonar DX, Multichannel (CARD=DX,DEV=0)"),
+                 ('set-devicename', aldevices[0]),
                  ('add-object-class-data', (
                      "AudioObjectMotion:mosquito", "mosquito #",
                      "OpenALObjectMoving", "mosquito.wav")),
@@ -188,7 +214,7 @@ if this_node_id == ecs_node:
                  ('set-coordinates', ( 0, 0, -2, 0, 0, 0)),
              ).complete()),
             ('initial-ears', (100, 0, 0, 0, 0, 0, 0, 0, 0)),
-            ('keep-running', True),
+            ('keep-running', False),
         ))
 
 
