@@ -55,6 +55,8 @@ static inline ALenum to_al_format(uint8_t channels, SDL_AudioFormat format)
       return AL_FORMAT_MONO8;
     }
   default:
+    E_MOD("No code to handle audior format, ch=" << int(channels) <<
+	  " bits=" << SDL_AUDIO_BITSIZE(format));
     return -1;
   }
 }
