@@ -25,6 +25,7 @@ dueca_add_dco()
 # detect any needed libraries here with CMake's mechanisms, such as
 # find_package, pkg_check_modules, or low-level find_path/find_library
 pkg_check_modules(PORTAUDIO portaudio-2.0 REQUIRED)
+pkg_check_modules(LIBSNDFILE sndfile REQUIRED)
 
 # if you need specific define's for the compilation, give them here
 set(CUSTOM_OPTIONS )
