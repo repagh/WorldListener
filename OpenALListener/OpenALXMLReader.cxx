@@ -134,8 +134,8 @@ bool OpenALXMLReader::readWorld(const std::string &file, OpenALListener &viewer)
 
     // each declaration gets translated in data for a createable object
     // either through direct creation or from a channel entry
-  for (auto def = world.child("declaration"); def;
-       def = def.next_sibling("declaration")) {
+  for (auto def = world.child("template"); def;
+       def = def.next_sibling("template")) {
 
       // Prepare the data for the object
     WorldDataSpec spec;

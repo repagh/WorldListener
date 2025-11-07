@@ -8,8 +8,8 @@
   <xs:element name="world">
     <xs:complexType>
       <xs:choice maxOccurs="unbounded" minOccurs="0">
-        <!-- Declarations group the definition of objects in the world -->
-        <xs:element name="declaration" type="declaration_t"/>
+        <!-- templates group the definition of objects in the world -->
+        <xs:element name="template" type="template_t"/>
         <!-- Statics group the instantiation of static objects in the world -->
         <xs:element name="static" type="static_t"/>
       </xs:choice>
@@ -19,7 +19,7 @@
   <!-- Each declaration is named, has a type which corresponds to an available
        object type created somewhere in a factory, and a key by which
        it can be created. The key may match on a channel entry -->
-  <xs:complexType name="declaration_t">
+  <xs:complexType name="template_t">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
       <xs:element name="param" type="param_t"/>
       <xs:element name="file" type="xs:string"/>
