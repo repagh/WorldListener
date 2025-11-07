@@ -105,15 +105,36 @@ bool OpenALListener::init()
 
 void OpenALListener::setBase(const BaseObjectMotion& listener)
 {
-  Eigen::Matrix<double,3,3> orimat;
-  listener.orientationToR(orimat);
+  // needs some fixing?
+  // https://pythonhosted.org/PyAL/audio.html
 
-  for (unsigned ii = 3; ii--; ) {
+  Eigen::Matrix<double,3,3> orimat;
+
+  listener.orientationToR(orimat);
+  double phi = listener.getPhi(), theta = listener.getTht(), psi = listener.getPsi();
+
+  /*for (unsigned ii = 3; ii--; ) {
     xyz[ii] = listener.xyz[ii];
     uvw[ii] = listener.uvw[ii];
     ori[ii] = orimat(ii,0);
     ori[ii+3] = orimat(ii,2);
   }
+  */
+  xyz[0] = listener.xyz[1];
+  xyz[1] = -listener.xyz[2];
+  xyz[2] = -listener.xyz[0];
+  uvw[0] = listener.uvw[1];
+  uvw[1] = -listener.uvw[2];
+  uvw[2] = -listener.uvw[0];
+
+  // orientation needs to be fixed??
+  ori[0] = orimat(0,1);  // my pos x-vector, convert to the openal axes
+  ori[1] = -orimat(0,2);
+  ori[2] = -orimat(0,0);
+  ori[3] = -orimat(2,1); // my neg z-vector, convert to openal axes
+  ori[4] = orimat(2,2);
+  ori[5] = orimat(2,0);
+
   if (device) {
     // update position, vel and orientation
     alListenerfv(AL_POSITION, xyz);
