@@ -64,7 +64,7 @@ try:
             dev += res[i]
         i += 1
     print(aldevices)
-        
+
 except ImportError:
     aldevices = [ 'Built-in Audio Analog Stereo' ]
 
@@ -135,12 +135,12 @@ if this_node_id == ecs_node:
             ('set-listener',
              dueca.OpenALListener().param(
                  ('set-devicename', aldevices[0]),
-                 ('add-object-class-data', (
-                     "AudioObjectMotion:mosquito", "mosquito #",
-                     "OpenALObjectMoving", "mosquito.wav")),
+      #           ('add-object-class-data', (
+       #              "AudioObjectMotion:mosquito", "mosquito #",
+        #             "OpenALObjectMoving", "mosquito.wav")),
                  # coordinates are x/y/z, u/v/w, volume, pitch
-                 ('add-object-class-coordinates', (
-                     0, 0, 0, 0, 0, 0, 0.99, 1.0)),
+         #        ('add-object-class-coordinates', (
+          #           0, 0, 0, 0, 0, 0, 0.99, 1.0)),
 
                  # old style hacks, link to the label
                  ('add-controlled-static-sound', (
@@ -212,6 +212,8 @@ if this_node_id == ecs_node:
                  ('add-controlled-static-sound', (
                      "touchdown", "PA34_touchdown.wav")),
                  ('set-coordinates', ( 0, 0, -2, 0, 0, 0)),
+
+                 ('read-xml-definitions', 'openalworld.xml')
              ).complete()),
             ('initial-ears', (100, 0, 0, 0, 0, 0, 0, 0, 0)),
             ('keep-running', False),

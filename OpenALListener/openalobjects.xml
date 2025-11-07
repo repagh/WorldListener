@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<maps xmlns="https://dueca.tudelft.nl"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="https://dueca.tudelft.nl openalobjects.xsd">
+
+  <type name="constant">
+    <param offset="0" size="3">xyz</param>
+    <param offset="3" size="3">uvw</param>
+    <param offset="6" size="1">volume_gain</param>
+    <param offset="7" size="1">pitch</param>
+    <param offset="8" size="3">dref_dmax_rollof</param>
+    <param offset="11" size="3">phithetapsi</param>
+    <param offset="14" size="3">coneinner_coneouter_outergain</param>
+  </type>
+
+  <type name="moving">
+    <param offset="0" size="3">xyz</param>
+    <param offset="3" size="3">uvw</param>
+    <param offset="6" size="1">volume_gain</param>
+    <param offset="7" size="1">pitch</param>
+    <param offset="8" size="3">dref_dmax_rollof</param>
+    <param offset="11" size="3">phithetapsi</param>
+    <param offset="14" size="3">coneinner_coneouter_outergain</param>
+  </type>
+
+  <type name="moving_relative">
+    <param offset="0" size="3">xyz</param>
+    <param offset="3" size="3">uvw</param>
+    <param offset="6" size="1">volume_gain</param>
+    <param offset="7" size="1">pitch</param>
+    <param offset="8" size="3">dref_dmax_rollof</param>
+    <param offset="11" size="3">phithetapsi</param>
+    <param offset="14" size="3">coneinner_coneouter_outergain</param>
+  </type>
+
+  <type name="fixed">
+    <param offset="0" size="3">xyz</param>
+    <param offset="3" size="3">uvw</param>
+    <param offset="6" size="1">volume_gain</param>
+    <param offset="7" size="1">pitch</param>
+    <param offset="8" size="3">dref_dmax_rollof</param>
+    <param offset="11" size="3">phithetapsi</param>
+    <param offset="14" size="3">coneinner_coneouter_outergain</param>
+  </type>
+
+  <type name="fixed_relative">
+    <param offset="0" size="3">xyz</param>
+    <param offset="3" size="3">uvw</param>
+    <param offset="6" size="1">volume_gain</param>
+    <param offset="7" size="1">pitch</param>
+    <param offset="8" size="3">dref_dmax_rollof</param>
+    <param offset="11" size="3">phithetapsi</param>
+    <param offset="14" size="3">coneinner_coneouter_outergain</param>
+  </type>
+
+</maps>

@@ -1,17 +1,17 @@
 # this file creates all links to files in the data directory needed for
-# running the application is a specific machine. 
+# running the application is a specific machine.
 #
 # example
 # ln -sf $DATADIR/*.cnf .
 DATADIR=../../run-data
-SNDDIR=${HOME}/gdapps/WorldListener.tud/WorldListener/PA34_sounds
+SNDDIR=${HOME}/gdapps/AudioModels/AudioModels/pa34-sounds
 
 ln -sf ../../../../WorldListener/WorldListener/startpulse.script
 test -d runlogs && mkdir runlogs
 ln -sf ../../../build/dueca_run.x .
 
 
-# brute-force everything max 44100, mono 
+# brute-force everything max 44100, mono
 for f in $SNDDIR/*.wav; do
     NEWRATE=
     NEWCHAN=
@@ -30,9 +30,10 @@ for f in $SNDDIR/*.wav; do
     fi
     if [ -n "$NEWCHAN$NEWRATE$NEWBITS" ]; then
         sox $f $NEWCHAN $NEWRATE $NEWBITS `basename $f` $NEWGAIN
-    else   
+    else
         ln -sf $f `basename $f`
     fi
 done
 
 ln -sf ../../../WorldListener/plotaudio.py .
+ln -sf ../../../OpenALListener/openalworld.xml .

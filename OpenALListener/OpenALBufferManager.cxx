@@ -2,8 +2,8 @@
 /*      item            : OpenALBufferManager.cxx
         made by         : Rene' van Paassen
         date            : 171210
-	category        : body file 
-        description     : 
+	category        : body file
+        description     :
 	changes         : 171210 first version
         language        : C++
 	copyright       : (c) 2017 TUDelft-AE-C&S
@@ -34,7 +34,7 @@ OpenALBufferManager::~OpenALBufferManager()
 static inline ALenum to_al_format(uint8_t channels, SDL_AudioFormat format)
 {
   bool stereo = (channels > 1);
-  
+
   switch (SDL_AUDIO_BITSIZE(format)) {
   case 16:
     if (stereo) {
@@ -71,7 +71,7 @@ ALuint OpenALBufferManager::getBuffer(const std::string& fname)
 
   // new buffer
   ALuint buffer;
-  
+
   // length of file name
   size_t lenfn = fname.size();
 
@@ -93,11 +93,14 @@ ALuint OpenALBufferManager::getBuffer(const std::string& fname)
     alGenBuffers((ALuint)1, &buffer);
     alBufferData(buffer, to_al_format(wav_spec.channels, wav_spec.format),
                  bufferData, wav_len, wav_spec.freq);
+    if(alGetError() != AL_NO_ERROR) {
+      throw(SoundFileReadError(fname, "cannot buffer to OpenAL (check file format)"));
+    }
     SDL_FreeWAV(bufferData);
     buffers[fname] = buffer;
     return buffer;
   }
-  
+
   throw(SoundFileReadError(fname, "cannot read file type"));
 }
 

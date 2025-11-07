@@ -4,8 +4,8 @@
 	from template   : DuecaHelperTemplate.hxx
         template made by: Rene van Paassen
         date            : Sat Nov 11 22:13:10 2017
-	category        : header file 
-        description     : 
+	category        : header file
+        description     :
 	changes         : Sat Nov 11 22:13:10 2017 first version
 	template changes: 050825 RvP Added template creation comment
         language        : C++
@@ -23,13 +23,16 @@
 #include <ParameterTable.hxx>
 #include <dueca_ns.h>
 
+#include <boost/scoped_ptr.hpp>
 #include <AL/al.h>
 #include <AL/alc.h>
 
 OPEN_NS_WORLDLISTENER;
 
+class OpenALXMLReader;
+
 /** Create an OpenAL backend for sound generation
-    
+
     This class has been derived from the ScriptCreatable base class,
     and has a (scheme) script command to create it and optionally add
     parameters.
@@ -42,27 +45,27 @@ OPEN_NS_WORLDLISTENER;
     First create one of the sounds, then specify coordinates, etc.
 
     In this backend, specify which sounds are to be played. A static sound
-    ('add-static-sound) will not change location and not need interaction 
+    ('add-static-sound) will not change location and not need interaction
     from the simulation. These background sounds will always be playing
-    following the prescribed pitch and volume. 
-    
+    following the prescribed pitch and volume.
+
     If you create a controlled static sound ('add-controlled-static-sound)
-    the name has to match an "AudioObjectFixed" entry in the 
-    AnyAudioClass://audio channel before it is activated. The entry 
+    the name has to match an "AudioObjectFixed" entry in the
+    AnyAudioClass://audio channel before it is activated. The entry
     controls volume and pitch, the location is determined by the coordinates
-    specified in the interface. 
+    specified in the interface.
 
     If you create a controlled moving sound ('add-controlled-moving-sound)
-    the name has to match an "AudioObjectMotion" entry in the channel. 
+    the name has to match an "AudioObjectMotion" entry in the channel.
     Coordinates only specify the initial position, the actual position will
-    be updated with the information from the channel. 
+    be updated with the information from the channel.
 
     Looping is overridden by the entry type, continuous (stream)
     entries will produce looping sound, event entries will produce a
     single play of the sound.
 
     Specification of directionality, giving a sound cone, is
-    optional. Only in that case the orientation of the sound source has a 
+    optional. Only in that case the orientation of the sound source has a
     significant effect.
  */
 class OpenALListener_DUECA: public dueca::ScriptCreatable,
@@ -82,9 +85,17 @@ class OpenALListener_DUECA: public dueca::ScriptCreatable,
   /** Next type to create */
   SoundType nexttype;
 
-  /** Parameters for creation */
+  /** Parameters for creation (old) */
   WorldDataSpec spec;
-  
+
+  /** Name for the next new spec */
+  std::string newspec_name;
+
+  /** Parameters for creation (new) */
+  WorldDataSpec newspec;
+
+  /** Reader for xml defs */
+  boost::scoped_ptr<OpenALXMLReader> xml_reader;
 public: // construction and further specification
   /** Constructor. Is normally called from scheme/the creation script. */
   OpenALListener_DUECA();
@@ -98,7 +109,7 @@ public: // construction and further specification
   ~OpenALListener_DUECA();
 
   /** Obtain a pointer to the parameter table. */
-  static const ParameterTable* getParameterTable();
+  static const dueca::ParameterTable* getParameterTable();
 
 public:
   /** Default script linkage. */
@@ -107,7 +118,10 @@ public:
 private:
   /** Complete specified new sound */
   bool completeSound();
-  
+
+  /** Complete specified new sound */
+  void completeNew();
+
   /** Create new static sound */
   bool addStaticSound(const std::vector<std::string>& names);
 
@@ -123,12 +137,15 @@ private:
   /** Specify sound coordinates */
   bool setCoordinates(const std::vector<double>& coords);
 
+  /** New coordinates */
+  bool addCoordinates(const std::vector<double>& coords);
+
   /** Specify distance model */
   bool setDistanceModel(const std::string& model);
 
   /** Specify distance parameters */
   bool setDistanceParams(const std::vector<double>& params);
-  
+
   /** Specify sound looping or not */
   bool setLooping(const bool& l);
 
@@ -143,6 +160,12 @@ private:
 
   /** specify object to be relative to listener */
   bool setRelative(const bool &rel);
+
+  /** Create the XML reader */
+  bool setXMLReader(const std::string &definitions);
+
+  /** Read an XML file with object data */
+  bool readModelFromXML(const std::string &file);
 };
 
 CLOSE_NS_WORLDLISTENER;

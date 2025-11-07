@@ -26,8 +26,8 @@
 #include <memory>
 
 // include headers for functions/classes you need in the module
-#if defined(DUECA_CONFIG_HDF5)
-#include <hdf5utils/HDFLogConfig.hxx>
+#if defined(DUECA_CONFIG_HDF5) || defined(DUECA_CONFIG_DDFF)
+#include <dueca/DUECALogConfig.hxx>
 #endif
 
 USING_DUECA_NS;
@@ -173,7 +173,7 @@ private: // channel access
   /** Flag to remember if the watcher list has been explicitly called */
   bool                                 no_explicit_entity_watch;
 
-#if defined(DUECA_CONFIG_HDF5)
+#if defined(DUECA_CONFIG_HDF5) || defined(DUECA_CONFIG_DDFF)
   /** Run counter, counts number of "Run" modes */
   int                                  runnumber;
 

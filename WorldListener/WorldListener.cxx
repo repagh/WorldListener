@@ -87,11 +87,11 @@ const ParameterTable* WorldListener::getMyParameterTable()
       "channel, explicitly add the channel names. Note that the argument\n"
       "must be iterable (tuple or list in Python)"},
 
-#if defined(DUECA_CONFIG_HDF5)
+#if defined(DUECA_CONFIG_HDF5) || (DUECA_CONFIG_DDFF)
     { "control-logger",
       new MemberCall<_ThisModule_,std::string>
       (&_ThisModule_::controlLogger),
-      "Specify a channel for control of an HDF logger" },
+      "Specify a channel for control of an HDF or ddff logger" },
 #endif
 
     { "keep-running",
@@ -131,7 +131,7 @@ WorldListener::WorldListener(Entity* e, const char* part, const
   r_own(),
   m_others(),
   no_explicit_entity_watch(true),
-#if defined(DUECA_CONFIG_HDF5)
+#if defined(DUECA_CONFIG_HDF5) || defined(DUECA_CONFIG_DDFF)
   runnumber(0),
   sendlogcontrol(true),
   w_logconfig(),
@@ -214,12 +214,12 @@ bool WorldListener::initialEar(const std::vector<double>& epos)
   return true;
 }
 
-#if defined(DUECA_CONFIG_HDF5)
+#if defined(DUECA_CONFIG_HDF5) || defined(DUECA_CONFIG_DDFF)
 bool WorldListener::controlLogger(const std::string& cname)
 {
   w_logconfig.reset
     (new ChannelWriteToken
-     (getId(), NameSet(cname), HDFLogConfig::classname,
+     (getId(), NameSet(cname), DUECALogConfig::classname,
       "from WorldListener", Channel::Events));
   return true;
 }
@@ -297,7 +297,7 @@ bool WorldListener::isPrepared()
   // Example checking a token:
   CHECK_TOKEN(*r_own);
 
-#if defined(DUECA_CONFIG_HDF5)
+#if defined(DUECA_CONFIG_HDF5) || defined(DUECA_CONFIG_DDFF)
   if (bool(w_logconfig)) {
     CHECK_TOKEN(*w_logconfig);
   }
@@ -369,9 +369,9 @@ void WorldListener::doCalculation(const TimeSpec& ts)
       listener->silence(ts);
     }
 
-#if defined(DUECA_CONFIG_HDF5)
+#if defined(DUECA_CONFIG_HDF5) || defined(DUECA_CONFIG_DDFF)
     if (sendlogcontrol && bool(w_logconfig)) {
-      DataWriter<HDFLogConfig> cnf(*w_logconfig, ts);
+      DataWriter<DUECALogConfig> cnf(*w_logconfig, ts);
       std::stringstream prf;
       prf << "run" << std::setw(4) << std::setfill('0') << runnumber++;
       cnf.data().prefix = prf.str();

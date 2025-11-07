@@ -66,19 +66,6 @@ bool OpenALListener::init()
   device = alcOpenDevice(devicename.size() ? devicename.c_str() : NULL);
   if (device == NULL) {
     E_MOD("Cannot open audio device " << devicename);
-#if 0
-    // enumerate possible devices
-    ALboolean enumeration = alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT");
-    if (enumeration == AL_TRUE) {
-      cerr << "OpenAL devices:" << endl;
-      const ALCchar *device = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
-      while (device && device[0] != '\0') {
-        cerr << device << endl;
-        size_t len = strlen(device);
-        device += len + 1;
-      }
-    }
-#endif
     return false;
   }
   else {
@@ -172,7 +159,12 @@ bool OpenALListener::createControllable
     WorldDataSpec obj = retrieveFactorySpec
       (data_class, entry_label, creation_id);
     I_MOD("creating with data " << obj);
-    op = OpenALObjectFactory::instance().create(obj.type, obj);
+
+    // use the first word from the type
+    auto idxs = obj.type.find(" ");
+    auto btype = (idxs == std::string::npos) ? obj.type : obj.type.substr(0, idxs);
+
+    op = OpenALObjectFactory::instance().create(btype, obj);
     op->connect(master_id, cname, entry_id, time_aspect);
     if (context) {
       alcMakeContextCurrent(context);
@@ -187,7 +179,7 @@ bool OpenALListener::createControllable
             " encountered: " <<  problem.what());
       throw(problem);
     }
-    W_MOD("OpenALListener: factory cannot create for " << data_class <<
+    W_MOD("OpenALListener: factory cannot create " << data_class <<
           ", ignoring this entry");
   }
   catch (const MapSpecificationError& problem) {

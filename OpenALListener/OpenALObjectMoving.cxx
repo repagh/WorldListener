@@ -131,5 +131,11 @@ static auto *OpenALObjectMoving_maker = new
 static auto *OpenALObjectMoving_maker2 = new
   SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>
   ("OpenALObjectMoving_relative");
+static auto *maker3 = new
+  SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>
+  ("moving");
+static auto *maker4 = new
+  SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>
+  ("moving_relative");
 
 CLOSE_NS_WORLDLISTENER;
