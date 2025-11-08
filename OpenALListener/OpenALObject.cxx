@@ -12,6 +12,7 @@
 #define OpenALObject_cxx
 #include "OpenALObject.hxx"
 #include "OpenALListener.hxx"
+#include "OpenALObjectFactory.hxx"
 #include <debug.h>
 #include "../WorldListener/AudioExceptions.hxx"
 
@@ -101,14 +102,14 @@ bool OpenALObject::initSound(OpenALListener* master)
               AL_TRUE : AL_FALSE);
     if (haveALError("specifying relative")) return false;
 
-    if (spec.coordinates.size() >= 11) {
+    if (spec.coordinates.size() >= 11 && (spec.coordinates[9] > spec.coordinates[8])) {
       // distance model adjustments
       alSourcef(source, AL_REFERENCE_DISTANCE, spec.coordinates[8]);
       alSourcef(source, AL_MAX_DISTANCE, spec.coordinates[9]);
       alSourcef(source, AL_ROLLOFF_FACTOR, spec.coordinates[10]);
     }
 
-    if (spec.coordinates.size() == 17) {
+    if (spec.coordinates.size() == 17 && (spec.coordinates[14] != 0.0 || spec.coordinates[15] != 0.0)) {
       // directional sound
       alSource3f(source, AL_DIRECTION, spec.coordinates[12],
                  -spec.coordinates[13], -spec.coordinates[11]);
@@ -164,5 +165,9 @@ const std::string& OpenALObject::getChannelClass()
   const static std::string empty("");
   return empty;
 }
+
+static auto *maker4 = new
+  SubContractor<OpenALObjectTypeKey, OpenALObject>
+  ("constant");
 
 CLOSE_NS_WORLDLISTENER;

@@ -12,27 +12,26 @@
         copyright       : (c) 2016 TUDelft-AE-C&S
 */
 
-
 // include the definition of the helper class
 #include "OpenALListener_DUECA.hxx"
 #include "OpenALObjectFixed.hxx"
 #include "OpenALObjectMoving.hxx"
+#include "OpenALXMLReader.hxx"
 #include <limits>
-
 
 // include additional files needed for your calculation here
 
 #define DO_INSTANTIATE
-#include <VarProbe.hxx>
+#include <CoreCreator.hxx>
 #include <MemberCall.hxx>
 #include <MemberCall2Way.hxx>
-#include <CoreCreator.hxx>
+#include <VarProbe.hxx>
 
 // include the debug writing header. Warning and error messages
 // are on by default, debug and info can be selected by
 // uncommenting the respective defines
-//#define D_MOD
-//#define I_MOD
+// #define D_MOD
+// #define I_MOD
 #include <debug.h>
 
 USING_DUECA_NS;
@@ -40,48 +39,47 @@ USING_DUECA_NS;
 OPEN_NS_WORLDLISTENER;
 
 // Parameters to be inserted
-const ParameterTable* OpenALListener_DUECA::getParameterTable()
+const ParameterTable *OpenALListener_DUECA::getParameterTable()
 {
   static const ParameterTable parameter_table[] = {
 
     { "set-listener-gain",
-      new VarProbe<_ThisObject_,float>(&_ThisObject_::listener_gain),
+      new VarProbe<_ThisObject_, float>(&_ThisObject_::listener_gain),
       "set listener gain (0-1). Note: 0.0=no sound, 1.0=no attenuation" },
 
     { "set-distance-model",
-      new MemberCall<_ThisObject_,std::string>
-      (&_ThisObject_::setDistanceModel),
+      new MemberCall<_ThisObject_, std::string>(
+        &_ThisObject_::setDistanceModel),
       "select the distance model for the listener (\"none\", \"linear\",\n"
       " \"inverse\", \"exponential\"), the latter three can be also clamped,\n"
       "specified like \"inverse clamped\", etc." },
 
     { "set-devicename",
-      new VarProbe<_ThisObject_,std::string>
-      (&_ThisObject_::devicename),
+      new VarProbe<_ThisObject_, std::string>(&_ThisObject_::devicename),
       "OpenAL device name" },
 
     { "add-static-sound",
-      new MemberCall<_ThisObject_,std::vector<std::string> >
-      (&_ThisObject_::addStaticSound),
+      new MemberCall<_ThisObject_, std::vector<std::string>>(
+        &_ThisObject_::addStaticSound),
       "Add a sound fixed in the world, specify name and filename. After\n"
       "adding, you can set the sound properties (position, etc.)." },
 
     { "add-controlled-static-sound",
-      new MemberCall<_ThisObject_,std::vector<std::string> >
-      (&_ThisObject_::addControlledStaticSound),
+      new MemberCall<_ThisObject_, std::vector<std::string>>(
+        &_ThisObject_::addControlledStaticSound),
       "Add a sound of which volume and pitch are controlled. Specify\n"
       "name and filename (obsolete, use add-object-class-data)" },
 
     { "add-controlled-moving-sound",
-      new MemberCall<_ThisObject_,std::vector<std::string> >
-      (&_ThisObject_::addControlledMovingSound),
+      new MemberCall<_ThisObject_, std::vector<std::string>>(
+        &_ThisObject_::addControlledMovingSound),
       "add a sound of which volume, pitch and movement are controlled.\n"
       "Specify a name for the sound and filename\n"
       "(obsolete, use add-object-class-data)" },
 
     { "add-object-class-data",
-      new MemberCall<_ThisObject_,std::vector<string> >
-      (&_ThisObject_::addObjectClassData),
+      new MemberCall<_ThisObject_, std::vector<string>>(
+        &_ThisObject_::addObjectClassData),
       "Create a new class (type) of simple objects, i.e. those that can be\n"
       "represented by one or more sound files. Specify the following\n"
       "- <DCO classname>[:label]. This is used to match to either\n"
@@ -92,91 +90,107 @@ const ParameterTable* OpenALListener_DUECA::getParameterTable()
       "- Sound file name[s]\n" },
 
     { "add-object-class-coordinates",
-      new MemberCall<_ThisObject_,std::vector<double> >
-      (&_ThisObject_::addCoordinates),
+      new MemberCall<_ThisObject_, std::vector<double>>(
+        &_ThisObject_::addCoordinates),
       "optionally add coordinates to the latest created objectclass with\n"
       "\"add-object-class-data\". For default sound classes, you can define\n"
       "the following groups. Note that these are optional.\n"
       "Defaults given in parentheses:\n"
       "* base coordinates: x, y, z (0,0,0)\n"
       "* velocity:         u, v, w (0,0,0)\n"
-      "* sound properties: volume (0, range 0-1), relative pitch (1.0)\n"
-      "* distance effects: ref dist (1), max dist (flt_max), rollof factor(1)\n"
+      "* sound properties: volume (1, range 0-1), relative pitch (1.0)\n"
+      "* distance effects: ref dist (1), max dist (flt_max), rollof "
+      "factor(1)\n"
       "* cone definition: phi, theta, psi direction,\n"
-      "                   cone inner, cone outer, cone gain\n"
-    },
+      "                   cone inner, cone outer, cone gain\n" },
 
     { "set-coordinates",
-      new MemberCall<_ThisObject_,std::vector<double> >
-      (&_ThisObject_::setCoordinates),
+      new MemberCall<_ThisObject_, std::vector<double>>(
+        &_ThisObject_::setCoordinates),
       "set position (x,y,z), speed (u,v,w)" },
 
     { "set-direction",
-      new MemberCall<_ThisObject_,std::vector<double> >
-      (&_ThisObject_::setDirection),
+      new MemberCall<_ThisObject_, std::vector<double>>(
+        &_ThisObject_::setDirection),
       "set sound orientation (phi, tht, psi), inner+outer cone angles [deg],\n"
       "and cone outer gain" },
 
     { "set-distance-params",
-      new MemberCall<_ThisObject_,std::vector<double> >
-      (&_ThisObject_::setDistanceParams),
+      new MemberCall<_ThisObject_, std::vector<double>>(
+        &_ThisObject_::setDistanceParams),
       "set distance parameters; reference distance (100 % gain), max (clamp)\n"
       "distance, and rolloff factor for exponential model (1..3 floats)" },
 
     { "set-looping",
-      new MemberCall<_ThisObject_,bool>
-      (&_ThisObject_::setLooping),
+      new MemberCall<_ThisObject_, bool>(&_ThisObject_::setLooping),
       "Set a sound to be looping (#t) or not (#f). Note that for controlled\n"
       "sounds driven by a continuous (stream) channel entry, looping is\n"
       "forced to on." },
 
     { "set-relative",
-      new MemberCall<_ThisObject_,bool>(&_ThisObject_::setRelative),
+      new MemberCall<_ThisObject_, bool>(&_ThisObject_::setRelative),
       "specify that the created sound object position & speed are relative\n"
       "to the observer, e.g., carried in the same vehicle" },
 
     { "set-pitch",
-      new MemberCall<_ThisObject_,double>
-      (&_ThisObject_::setPitch),
+      new MemberCall<_ThisObject_, double>(&_ThisObject_::setPitch),
       "set pitch multiplier" },
 
-    { "set-gain",
-      new MemberCall<_ThisObject_,double>
-      (&_ThisObject_::setGain),
+    { "set-gain", new MemberCall<_ThisObject_, double>(&_ThisObject_::setGain),
       "set sound gain, range of 0.0 to 1.0" },
 
     { "allow-unknown",
-      new VarProbe<_ThisObject_,bool>(&_ThisObject_::allow_unknown),
+      new VarProbe<_ThisObject_, bool>(&_ThisObject_::allow_unknown),
       "ignore unknown or unconnected objects in world information channels" },
 
+    { "set-xml-definitions",
+      new MemberCall<_ThisObject_, std::string>(&_ThisObject_::setXMLReader),
+      "Initialise the XML reader, argument is an XML file with mappings\n"
+      "from named coordinates/parameters to ranges in the coordinate vectors.\n"
+      "See 'openalobjects.xsd' for the format, and 'openalobjects.xml' for an\n"
+      "example." },
 
-    /* You can extend this table with labels and MemberCall or
-       VarProbe pointers to perform calls or insert values into your
-       class objects. Please also add a description (c-style string). */
+    { "read-xml-definitions",
+      new MemberCall<_ThisObject_, std::string>(
+        &_ThisObject_::readModelFromXML),
+      "Read the audio model from an XML file definition. See\n"
+      "'openalworld.xsd' for the format. This provides an alternative to "
+      "using the add_object_class, add_object_class_parameters and \n"
+      "static_object parameters." },
 
-    /* The table is closed off with NULL pointers for the variable
-       name and MemberCall/VarProbe object. The description is used to
-       give an overall description of the module. */
-    { NULL, NULL,
-      "This helper class provides a sound interface to OpenAL"} };
+      /* You can extend this table with labels and MemberCall or
+     VarProbe pointers to perform calls or insert values into your
+     class objects. Please also add a description (c-style string). */
+
+      /* The table is closed off with NULL pointers for the variable
+     name and MemberCall/VarProbe object. The description is used to
+     give an overall description of the module. */
+    { NULL, NULL, "This helper class provides a sound interface to OpenAL" }
+  };
 
   return parameter_table;
 }
+
+static const std::vector<double> _defcoords = { 0.0, 0.0,      0.0, 0.0, 0.0,
+                                                0.0, 0.999999, 1.0, 0 };
 
 // constructor
 OpenALListener_DUECA::OpenALListener_DUECA() :
   ScriptCreatable(),
   OpenALListener(),
   nexttype(None),
-  spec()
+  spec(),
+  newspec_name(),
+  newspec()
 {
-  //
+  newspec.coordinates = _defcoords;
 }
 
 bool OpenALListener_DUECA::complete()
 {
   /* All your parameters have been set. You may do extended
      initialisation here. Return false if something is wrong. */
+  completeNew();
   return completeSound();
 }
 
@@ -210,10 +224,10 @@ bool OpenALListener_DUECA::completeSound()
   return false;
 }
 
-bool OpenALListener_DUECA::addStaticSound(const std::vector<std::string>&
-                                          names)
+bool OpenALListener_DUECA::addStaticSound(const std::vector<std::string> &names)
 {
-  if (!completeSound()) return false;
+  if (!completeSound())
+    return false;
   nexttype = StaticSound;
   if (names.size() != 2) {
     E_MOD("Need a name and filename for static sound");
@@ -225,30 +239,32 @@ bool OpenALListener_DUECA::addStaticSound(const std::vector<std::string>&
   spec.filename.push_back(names[1]);
   spec.coordinates.resize(0);
   spec.coordinates.resize(8, 0.0);
-  spec.coordinates[6] = 0.999999f;
-  spec.coordinates[7] = 1.0f;
+  spec.coordinates[6] = 0.999999;
+  spec.coordinates[7] = 1.0;
   return true;
 }
 
-bool OpenALListener_DUECA::addControlledStaticSound
-(const std::vector<std::string>& names)
+bool OpenALListener_DUECA::addControlledStaticSound(
+  const std::vector<std::string> &names)
 {
-  if (!addStaticSound(names)) return false;
+  if (!addStaticSound(names))
+    return false;
   spec.type = "static controlled";
   nexttype = ControlledStaticSound;
   return true;
 }
 
-bool OpenALListener_DUECA::addControlledMovingSound
-(const std::vector<std::string>& names)
+bool OpenALListener_DUECA::addControlledMovingSound(
+  const std::vector<std::string> &names)
 {
-  if (!addStaticSound(names)) return false;
+  if (!addStaticSound(names))
+    return false;
   spec.type = "moving controlled";
   nexttype = ControlledMovingSound;
   return true;
 }
 
-bool OpenALListener_DUECA::setRelative(const bool& rel)
+bool OpenALListener_DUECA::setRelative(const bool &rel)
 {
   if (rel && spec.type.find("relative") == string::npos) {
     spec.type += " relative";
@@ -259,7 +275,7 @@ bool OpenALListener_DUECA::setRelative(const bool& rel)
   return true;
 }
 
-bool OpenALListener_DUECA::setCoordinates(const std::vector<double>& coords)
+bool OpenALListener_DUECA::setCoordinates(const std::vector<double> &coords)
 {
   if (coords.size() != 6) {
     E_MOD("Need 6 coordinate values");
@@ -269,8 +285,18 @@ bool OpenALListener_DUECA::setCoordinates(const std::vector<double>& coords)
   return true;
 }
 
-bool OpenALListener_DUECA::addObjectClassData
-(const std::vector<std::string>& names)
+void OpenALListener_DUECA::completeNew()
+{
+  if (newspec_name.size()) {
+
+    addFactorySpec(newspec_name, newspec);
+    newspec_name = "";
+    newspec = WorldDataSpec{};
+  }
+}
+
+bool OpenALListener_DUECA::addObjectClassData(
+  const std::vector<std::string> &names)
 {
   if (names.size() < 3) {
     E_CNF("Specify a match string for creation, class name, factory type and"
@@ -278,20 +304,35 @@ bool OpenALListener_DUECA::addObjectClassData
     return false;
   }
 
-  WorldDataSpec obj;
-  obj.type = names[2];
-  obj.name = names[1];
-  for (size_t ii = 3; ii < names.size(); ii++) {
-    obj.filename.push_back(names[ii]);
-  }
+  // see if a complete object class is there
+  completeNew();
 
-  addFactorySpec(names[0], obj);
+  newspec_name = names[0];
+
+  newspec.type = names[2];
+  newspec.name = names[1];
+  for (size_t ii = 3; ii < names.size(); ii++) {
+    newspec.filename.push_back(names[ii]);
+  }
+  newspec.coordinates = _defcoords;
+
   return true;
 }
 
-bool OpenALListener_DUECA::setLooping(const bool& l)
+bool OpenALListener_DUECA::addCoordinates(const std::vector<double> &coords)
 {
-  if(l)
+  if (coords.size() < newspec.coordinates.size()) {
+    std::copy(coords.begin(), coords.end(), newspec.coordinates.begin());
+  }
+  else {
+    newspec.coordinates = coords;
+  }
+  return true;
+}
+
+bool OpenALListener_DUECA::setLooping(const bool &l)
+{
+  if (l)
     spec.type += " looping";
   return true;
 }
@@ -301,22 +342,19 @@ inline double limit(double dmin, double dval, double dmax)
   return (dval < dmin) ? dmin : ((dval > dmax) ? dmax : dval);
 }
 
-bool OpenALListener_DUECA::setPitch(const double& p)
+bool OpenALListener_DUECA::setPitch(const double &p)
 {
   spec.coordinates[7] = limit(0.001, p, 1000.0);
   return true;
 }
 
-bool OpenALListener_DUECA::setGain(const double& g)
+bool OpenALListener_DUECA::setGain(const double &g)
 {
   spec.coordinates[6] = limit(0.0, g, 1.0);
   return true;
 }
 
-inline double d2r(double x)
-{
-  return M_PI/180.0*x;
-}
+inline double d2r(double x) { return M_PI / 180.0 * x; }
 
 bool OpenALListener_DUECA::setDirection(const std::vector<double> &dir)
 {
@@ -343,14 +381,14 @@ bool OpenALListener_DUECA::setDirection(const std::vector<double> &dir)
 
   // x, y and z component direction vector
   const int b = 11;
-  spec.coordinates[b+0] = cos(d2r(dir[2]))*cos(d2r(dir[1]));
-  spec.coordinates[b+1] = sin(d2r(dir[2]))*cos(d2r(dir[1]));
-  spec.coordinates[b+2]= -sin(d2r(dir[1]));
+  spec.coordinates[b + 0] = cos(d2r(dir[2])) * cos(d2r(dir[1]));
+  spec.coordinates[b + 1] = sin(d2r(dir[2])) * cos(d2r(dir[1]));
+  spec.coordinates[b + 2] = -sin(d2r(dir[1]));
 
   // cone angles and gain outer cone
-  spec.coordinates[b+3] = dir[3];
-  spec.coordinates[b+4] = dir[4];
-  spec.coordinates[b+5] = dir[5];
+  spec.coordinates[b + 3] = dir[3];
+  spec.coordinates[b + 4] = dir[4];
+  spec.coordinates[b + 5] = dir[5];
 
   return true;
 }
@@ -367,13 +405,15 @@ bool OpenALListener_DUECA::setDistanceParams(const std::vector<double> &dir)
     spec.coordinates[10] = 1.0;
   }
   const int b = 8;
-  spec.coordinates[b+0] = dir[0];
-  if (dir.size() > 1) spec.coordinates[b+1] = dir[1];
-  if (dir.size() > 2) spec.coordinates[b+2] = dir[2];
+  spec.coordinates[b + 0] = dir[0];
+  if (dir.size() > 1)
+    spec.coordinates[b + 1] = dir[1];
+  if (dir.size() > 2)
+    spec.coordinates[b + 2] = dir[2];
   return true;
 }
 
-bool OpenALListener_DUECA::setDistanceModel(const std::string& model)
+bool OpenALListener_DUECA::setDistanceModel(const std::string &model)
 {
   if (model == "none") {
     distance_model = AL_NONE;
@@ -403,15 +443,47 @@ bool OpenALListener_DUECA::setDistanceModel(const std::string& model)
   return true;
 }
 
+bool OpenALListener_DUECA::setXMLReader(const std::string &definitions)
+{
+  if (xml_reader) {
+    E_MOD("Error, second attempt to use set_xml_definitions or use of this "
+          " call after using read_xml_defintions");
+    return false;
+  }
+  try {
+    xml_reader.reset(new OpenALXMLReader(definitions));
+  }
+  catch (const std::exception &e) {
+    E_MOD("Error in initialising XML reader: " << e.what());
+    return false;
+  }
+  return true;
+}
+
+bool OpenALListener_DUECA::readModelFromXML(const std::string &file)
+{
+  try {
+    if (!xml_reader) {
+      I_MOD("Creating default xml reader");
+      xml_reader.reset(new OpenALXMLReader(
+        "../../../../WorldListener/OpenALListener/openalobjects.xml"));
+    }
+    return xml_reader->readWorld(file, *this);
+  }
+  catch (const std::exception &e) {
+    E_MOD("Error in reading xml definitions from " << file);
+    return false;
+  }
+}
+
 CLOSE_NS_WORLDLISTENER;
 
 // script access macro
-SCM_FEATURES_NOIMPINH(worldlistener::OpenALListener_DUECA,
-                      ScriptCreatable, "openal-listener");
+SCM_FEATURES_NOIMPINH(worldlistener::OpenALListener_DUECA, ScriptCreatable,
+                      "openal-listener");
 
 // Make a CoreCreator object for this module, the CoreCreator
 // will check in with the scheme-interpreting code, and enable the
 // creation of objects of this type
 static CoreCreator<worldlistener::OpenALListener_DUECA>
-a(worldlistener::OpenALListener_DUECA::getParameterTable(),
-  "OpenALListener");
+  a(worldlistener::OpenALListener_DUECA::getParameterTable(), "OpenALListener");

@@ -121,5 +121,11 @@ static auto *OpenALObjectFixed_maker = new
 static auto *OpenALObjectFixed_maker2 = new
   SubContractor<OpenALObjectTypeKey, OpenALObjectFixed>
   ("OpenALObjectFixed_relative");
+static auto *maker3 = new
+  SubContractor<OpenALObjectTypeKey, OpenALObjectFixed>
+  ("fixed_relative");
+static auto *maker4 = new
+  SubContractor<OpenALObjectTypeKey, OpenALObjectFixed>
+  ("fixed");
 
 CLOSE_NS_WORLDLISTENER;

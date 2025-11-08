@@ -29,7 +29,7 @@ public:
                    * name: for identification
                    * type: looping to indicate looping sound
                            relative to indicate move with observer
-                   * filename: only 1st element, file for sound
+                   * filenames: only 1st element, file for sound
                    * coordinates: xyz (3), uvw (3), unused, unused, 
                      dirxyz(3), inner/outer cone angle, outer cone gain
                    */

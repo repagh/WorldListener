@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<world xmlns="https://dueca.tudelft.nl"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="https://dueca.tudelft.nl openalworld.xsd">
+
+  <template type="moving_relative looping" key="AudioObjectMotion:mosquito">
+    <param name="volume">0.99</param>
+    <param name="pitch">2.0</param>
+    <file>mosquito.wav</file>
+  </template>
+  <static type="constant looping" name="gearup2">
+    <file> PA34_gear_up.wav</file>
+    <param name="volume">0.3</param>
+  </static>
+</world>

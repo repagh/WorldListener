@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://dueca.tudelft.nl"
+           xmlns="https://dueca.tudelft.nl"
+           elementFormDefault="qualified">
+
+  <!-- Main element, graphics world -->
+  <xs:element name="world">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded" minOccurs="0">
+        <!-- templates group the definition of objects in the world -->
+        <xs:element name="template" type="template_t"/>
+        <!-- Statics group the instantiation of static objects in the world -->
+        <xs:element name="static" type="static_t"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Each declaration is named, has a type which corresponds to an available
+       object type created somewhere in a factory, and a key by which
+       it can be created. The key may match on a channel entry -->
+  <xs:complexType name="template_t">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="param" type="param_t"/>
+      <xs:element name="file" type="xs:string"/>
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="type" type="xs:string" use="required"/>
+    <xs:attribute name="key" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="param_t">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- A static instantiates a fixed object
+       The static provides the name, type and coordinates and file name(s). -->
+  <xs:complexType name="static_t">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="param" type="param_t"/>
+      <xs:element name="file" type="xs:string"/>
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="type" type="xs:string" use="required"/>
+  </xs:complexType>
+
+</xs:schema>

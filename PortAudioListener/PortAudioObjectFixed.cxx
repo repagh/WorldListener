@@ -76,6 +76,7 @@ const std::string& PortAudioObjectFixed::getChannelClass()
 
 void PortAudioObjectFixed::addData(float* out, unsigned dataCount)
 {
+  memset(out, 0, dataCount*sizeof(float));
   unsigned ii = channel;
   while (ii < dataCount && ridx < buffer->info.frames) {
     out[ii] += volume * buffer->data[ridx];

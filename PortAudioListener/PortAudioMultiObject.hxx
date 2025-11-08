@@ -78,6 +78,9 @@ protected:
   /** Optional channel for selection of new audio file */
   boost::scoped_ptr<ChannelReadToken>      r_newfile;
 
+  /** New buffer with audio play data */
+  volatile PortAudioBufferManager::buffer_ptr_t next_buffer;
+  
 public:
   /** Constructor. By itself this class creates a static sound
 

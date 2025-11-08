@@ -45,6 +45,7 @@ dueca_add_module(
   # in the form of project/module. Code generation order will be correct,
   # and the source location of these modules is added to the include path
   USEMODULES
+  WorldListener
 
   # optionally specify libraries used for this module
   LIBRARIES

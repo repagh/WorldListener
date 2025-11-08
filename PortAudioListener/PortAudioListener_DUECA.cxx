@@ -16,6 +16,7 @@
 // include the definition of the helper class
 #include "PortAudioListener_DUECA.hxx"
 #include "PortAudioObjectFixed.hxx"
+#include "../WorldListener/AudioExceptions.hxx"
 #include <limits>
 
 
@@ -117,6 +118,11 @@ const ParameterTable* PortAudioListener_DUECA::getParameterTable()
     { "allow-unknown",
       new VarProbe<_ThisObject_,bool>(&_ThisObject_::allow_unknown),
       "ignore unknown or unconnected objects in world information channels" },
+
+    { "preload-sounds",
+      new MemberCall<_ThisObject_,std::vector<std::string> >
+      (&_ThisObject_::preloadSounds),
+      "Pre-load sound buffers for sounds played by PortAudioMultiObject\n" },
 
     /* You can extend this table with labels and MemberCall or
        VarProbe pointers to perform calls or insert values into your
@@ -252,6 +258,21 @@ inline double limit(double dmin, double dval, double dmax)
 bool PortAudioListener_DUECA::setGain(const double& g)
 {
   spec.coordinates[1] = limit(0.0, g, 1.0);
+  return true;
+}
+
+bool PortAudioListener_DUECA::
+preloadSounds(const std::vector<std::string>& sounds)
+{
+  for (const auto& sndfile: sounds) {
+    try {
+      auto buffer = this->getBufferManager().getBuffer(sndfile);
+    }
+    catch (const SoundFileReadError& e) {
+      W_MOD("Cannot load '" << sndfile << "' " << e.what());
+      return false;
+    }
+  }
   return true;
 }
 
