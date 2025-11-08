@@ -16,59 +16,55 @@
 
 OPEN_NS_WORLDLISTENER;
 
-OpenALObjectMoving::OpenALObjectMoving(const WorldDataSpec& spec) :
+OpenALObjectMoving::OpenALObjectMoving(const WorldDataSpec &spec) :
   OpenALObject(spec)
 {
   //
 }
 
+OpenALObjectMoving::~OpenALObjectMoving() {}
 
-OpenALObjectMoving::~OpenALObjectMoving()
-{
-
-}
-
-void OpenALObjectMoving::connect(const GlobalId& master_id,
-                                const NameSet& cname,
-                                entryid_type entry_id,
-                                Channel::EntryTimeAspect time_aspect)
+void OpenALObjectMoving::connect(const GlobalId &master_id,
+                                 const NameSet &cname, entryid_type entry_id,
+                                 Channel::EntryTimeAspect time_aspect)
 {
   looping = looping || (time_aspect == Channel::Continuous);
-  r_audio.reset(new ChannelReadToken
-                (master_id, cname, AudioObjectMotion::classname, entry_id,
-                 time_aspect, Channel::OneOrMoreEntries,
-                 looping ? Channel::JumpToMatchTime : Channel::ReadAllData));
+  r_audio.reset(new ChannelReadToken(
+    master_id, cname, AudioObjectMotion::classname, entry_id, time_aspect,
+    Channel::OneOrMoreEntries,
+    looping ? Channel::JumpToMatchTime : Channel::ReadAllData));
   if (source) {
     alSourcei(source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
   }
 }
 
-void OpenALObjectMoving::iterate(const TimeSpec& ts,
-                                 const BaseObjectMotion& base)
+void OpenALObjectMoving::iterate(const TimeSpec &ts,
+                                 const BaseObjectMotion &base)
 {
   if (r_audio->isValid() && source) {
-    if (looping || r_audio->getNumVisibleSets(ts.getValidityStart()) ) {
+    if (looping || r_audio->getNumVisibleSets(ts.getValidityStart())) {
       try {
 
         // access the data, read latest matching, but accept older
         // data
-#if DUECA_VERSION_NUM >= DUECA_VERSION(2,5,0)
-        DataReader<AudioObjectMotion,MatchIntervalStartOrEarlier>
+#if DUECA_VERSION_NUM >= DUECA_VERSION(2, 5, 0)
+        DataReader<AudioObjectMotion, MatchIntervalStartOrEarlier>
 #else
         DataReader<AudioObjectMotion,
-                   MatchIntervalStartOrEarlier<AudioObjectMotion> >
+                   MatchIntervalStartOrEarlier<AudioObjectMotion>>
 #endif
           r(*r_audio, ts);
-        //cerr << r.data() << endl;
+        // cerr << r.data() << endl;
 
         // set source position, speed and direction vector
-        alSource3f(source, AL_POSITION, r.data().xyz[1],
-                   -r.data().xyz[2],-r.data().xyz[0]);
-        alSource3f(source, AL_VELOCITY, r.data().uvw[1],
-                   -r.data().uvw[2],-r.data().uvw[0]);
-        float dir[] = { float(cos(r.data().getPsi()) * cos(r.data().getTht())),
-                        float(sin(r.data().getPsi()) * cos(r.data().getTht())),
-                        float(-sin(r.data().getTht())) };
+        alSource3f(source, AL_POSITION, r.data().xyz[1], -r.data().xyz[2],
+                   -r.data().xyz[0]);
+        alSource3f(source, AL_VELOCITY, r.data().uvw[1], -r.data().uvw[2],
+                   -r.data().uvw[0]);
+        float dir[] = { float(sin(r.data().getPsi()) * cos(r.data().getTht())),
+                        float(sin(r.data().getTht())),
+                        float(-cos(r.data().getPsi()) * cos(r.data().getTht()))
+        };
         alSourcefv(source, AL_DIRECTION, dir);
 
         if (!looping) {
@@ -110,32 +106,29 @@ void OpenALObjectMoving::iterate(const TimeSpec& ts,
             needstart = false;
           }
         }
-
       }
-      catch (const NoDataAvailable& e) {
+      catch (const NoDataAvailable &e) {
         I_MOD("no audio data for " << spec.name);
       }
     }
   }
 }
 
-const std::string& OpenALObjectMoving::getChannelClass()
+const std::string &OpenALObjectMoving::getChannelClass()
 {
   const static std::string cname(AudioObjectMotion::classname);
   return cname;
 }
 
-static auto *OpenALObjectMoving_maker = new
-  SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>
-  ("OpenALObjectMoving");
-static auto *OpenALObjectMoving_maker2 = new
-  SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>
-  ("OpenALObjectMoving_relative");
-static auto *maker3 = new
-  SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>
-  ("moving");
-static auto *maker4 = new
-  SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>
-  ("moving_relative");
+static auto *OpenALObjectMoving_maker =
+  new SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>(
+    "OpenALObjectMoving");
+static auto *OpenALObjectMoving_maker2 =
+  new SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>(
+    "OpenALObjectMoving_relative");
+static auto *maker3 =
+  new SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>("moving");
+static auto *maker4 =
+  new SubContractor<OpenALObjectTypeKey, OpenALObjectMoving>("moving_relative");
 
 CLOSE_NS_WORLDLISTENER;
